@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <iostream>
+#include "utility.h"
 using namespace std;
 
 #define BACKLOG 10
@@ -92,6 +93,8 @@ int main(void){
 		}
 		buf[numbytes]='\0';
 		cout<<"server received:"<<buf<<endl;
+		cout<<"grep result is"<<endl<<
+		grep_server(buf)<<endl;
 		if(!fork()){
 			close(sockfd);
 			if(send(new_fd,"Hello,world!",13,0)==-1){

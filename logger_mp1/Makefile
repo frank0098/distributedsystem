@@ -7,10 +7,10 @@ CFLAGS=-c -Wall -std=c++11
 all: server client
 
 server: server.o utility.o 
-	$(CC) server.o utility.o -o server
+	$(CC) server.o utility.o -o server.out
 
 client: client.o utility.o
-	$(CC) client.o utility.o -o client
+	$(CC) client.o utility.o -o client.out
 
 client.o: client.cpp utility.o
 	$(CC) $(CFLAGS) client.cpp
@@ -22,4 +22,4 @@ utility.o: utility.cpp utility.h
 	$(CC) $(CFLAGS) utility.cpp 
 
 clean:
-	rm *.o server client
+	rm *.o server.out client.out
