@@ -75,19 +75,18 @@ int main(int argc, char *argv[])
     printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
-    while(1){
-    	if(send(sockfd,"ls",2,0)==-1){
-    		perror("send error\n");
-    		//exit(1);
-    	}
-    	sleep(1);
-    	// if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-	    //     perror("recv\n");
-	    //     //exit(1);
-    	// }
-    	// buf[numbytes] = '\0';
-    	printf("client: received '%s'\n",buf);
-    }
+
+	if(send(sockfd,"ls",2,0)==-1){
+		perror("send error\n");
+		exit(1);
+	}
+	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("recv\n");
+        exit(1);
+	}
+	buf[numbytes] = '\0';
+	printf("client: received '%s'\n",buf);
+ 
     
 
     

@@ -93,13 +93,18 @@ int main(void){
 		}
 		buf[numbytes]='\0';
 		cout<<"server received:"<<buf<<endl;
-		cout<<"grep result is"<<endl<<
-		grep_server(buf)<<endl;
+
+		const string grep_result=grep_server(buf);
 		if(!fork()){
 			close(sockfd);
-			if(send(new_fd,"Hello,world!",13,0)==-1){
+			 char* thing_to_send=new char(grep_result.size()+2);
+			 
+			 strcpy(thing_to_send,grep_result.c_str());
+			 thing_to_send[grep_result.size()]='\0';
+			if(send(new_fd,thing_to_send,strlen(thing_to_send),0)==-1){
 				perror("send");
 			}
+			delete[] thing_to_send;
 			close(new_fd);
 			exit(0);
 		}
