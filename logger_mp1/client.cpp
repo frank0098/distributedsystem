@@ -13,7 +13,7 @@
 
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 200 // max number of bytes we can get at once 
 
 using namespace std;
 // get sockaddr, IPv4 or IPv6:
@@ -84,8 +84,9 @@ int main(int argc, char *argv[])
         perror("recv\n");
         exit(1);
 	}
+    cout<<numbytes<<endl;
 	buf[numbytes] = '\0';
-	printf("client: received '%s'\n",buf);
+	printf("client: received %s\n",buf);
  
     
 

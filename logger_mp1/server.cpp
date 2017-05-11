@@ -54,7 +54,7 @@ int main(void){
 			perror("setsockopt");
 			exit(1);
 		}
-		if(bind(sockfd,p->ai_addr,p->ai_addrlen)==-1){
+		if(::bind(sockfd,p->ai_addr,p->ai_addrlen)==-1){
 			close(sockfd);
 			perror("server:bind");
 			continue;
@@ -97,10 +97,13 @@ int main(void){
 		const string grep_result=grep_server(buf);
 		if(!fork()){
 			close(sockfd);
-			 char* thing_to_send=new char(grep_result.size()+2);
+			 char* thing_to_send=new char[grep_result.size()+1];
 			 
 			 strcpy(thing_to_send,grep_result.c_str());
+
 			 thing_to_send[grep_result.size()]='\0';
+			 cout<<grep_result.size()<<endl;
+			 cout<<strlen(thing_to_send)<<endl;
 			if(send(new_fd,thing_to_send,strlen(thing_to_send),0)==-1){
 				perror("send");
 			}
