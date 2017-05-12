@@ -10,11 +10,11 @@
 #include <sys/socket.h>
 #include <iostream>
 #include <arpa/inet.h>
-
+#include "utility.h"
 #define PORT "3490" // the port client will be connecting to 
 
-#define MAXDATASIZE 200 // max number of bytes we can get at once 
-
+#define MAXDATASIZE 2000000 // max number of bytes we can get at once 
+#define CMD_BUF_SIZE 200
 using namespace std;
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -26,24 +26,20 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int main(int argc, char *argv[])
-{
+int distrbuted_grep(const char* ip_addr,const char* cmd){
+
+
     int sockfd, numbytes;  
     char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
 
-    if (argc != 2) {
-        fprintf(stderr,"usage: client hostname\n");
-        exit(1);
-    }
-
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(ip_addr, PORT, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -75,24 +71,49 @@ int main(int argc, char *argv[])
     printf("client: connecting to %s\n", s);
 
     freeaddrinfo(servinfo); // all done with this structure
-
-	if(send(sockfd,"ls",2,0)==-1){
-		perror("send error\n");
-		exit(1);
-	}
-	if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+    if(send(sockfd,cmd,strlen(cmd),0)==-1){
+        perror("send error\n");
+        exit(1);
+    }
+    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv\n");
         exit(1);
-	}
+    }
     cout<<numbytes<<endl;
-	buf[numbytes] = '\0';
-	printf("client: received %s\n",buf);
- 
-    
-
-    
-
+    buf[numbytes] = '\0';
+    printf("client: received %s\n",buf);
     close(sockfd);
+
+}
+int main(int argc, char *argv[])
+{
+
+
+    if (argc != 3) {
+        fprintf(stderr,"usage: client.out option params\n");
+        exit(1);
+    }
+
+    try{
+        vector<string> ip_addrs=server_addr_read_config("server.cfg");
+
+        if(ip_addrs.empty()){
+            perror("empty config file\n");
+            return -1;
+        }
+        char cmd_buf[CMD_BUF_SIZE];
+        strcpy(cmd_buf,argv[1]);
+        strcat(cmd_buf," ");
+        strcat(cmd_buf,argv[2]);
+        for(auto ip:ip_addrs){
+            distrbuted_grep(ip.c_str(),cmd_buf);
+        }
+    }
+    catch(std::runtime_error err){
+        cout<<"runtime_error"<<err.what()<<endl;
+    }
+    
+
 
     return 0;
 }

@@ -17,7 +17,7 @@ using namespace std;
 
 #define BACKLOG 10
 #define PORT "3490"
-#define MAXDATASIZE 200
+#define MAXDATASIZE 2000000
 void sigchld_handler(int s){
 	int saved_errno=errno;
 	while(waitpid(-1,NULL,WNOHANG)>0);
@@ -87,6 +87,7 @@ int main(void){
 		}
 		inet_ntop(their_addr.ss_family,get_in_addr((struct sockaddr *)&their_addr),s,sizeof(s));
 		cout<<"server:got connection from"<<s<<endl;
+		cout<<sizeof(buf)<<endl;
 		if((numbytes=recv(new_fd,buf,sizeof(buf)-1,0))==-1){
 			perror("recv");
 			exit(1);
@@ -94,20 +95,19 @@ int main(void){
 		buf[numbytes]='\0';
 		cout<<"server received:"<<buf<<endl;
 
-		const string grep_result=grep_server(buf);
+		const string grep_result=grep_server(buf,"logpath.cfg");
 		if(!fork()){
 			close(sockfd);
-			 char* thing_to_send=new char[grep_result.size()+1];
-			 
-			 strcpy(thing_to_send,grep_result.c_str());
+			 // char* thing_to_send=new char[grep_result.size()+1];
+			 // strcpy(thing_to_send,grep_result.c_str());
+			 // thing_to_send[grep_result.size()]='\0';
+			const char* thing_to_send = grep_result.c_str();
 
-			 thing_to_send[grep_result.size()]='\0';
-			 cout<<grep_result.size()<<endl;
-			 cout<<strlen(thing_to_send)<<endl;
 			if(send(new_fd,thing_to_send,strlen(thing_to_send),0)==-1){
 				perror("send");
+				cout<<"what?"<<endl;
 			}
-			delete[] thing_to_send;
+			// delete[] thing_to_send;
 			close(new_fd);
 			exit(0);
 		}
