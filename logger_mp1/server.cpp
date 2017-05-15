@@ -18,6 +18,7 @@ using namespace std;
 #define BACKLOG 10
 #define PORT "3490"
 #define MAXDATASIZE 2000000
+
 void sigchld_handler(int s){
 	int saved_errno=errno;
 	while(waitpid(-1,NULL,WNOHANG)>0);
@@ -104,7 +105,7 @@ int main(void){
 			const char* thing_to_send = grep_result.c_str();
 
 			if(send(new_fd,thing_to_send,strlen(thing_to_send),0)==-1){
-				perror("send");
+				perror("nmh");
 				cout<<"what?"<<endl;
 			}
 			// delete[] thing_to_send;

@@ -79,10 +79,11 @@ int distrbuted_grep(const char* ip_addr,const char* cmd){
         perror("recv\n");
         exit(1);
     }
-    cout<<numbytes<<endl;
     buf[numbytes] = '\0';
-    printf("client: received %s\n",buf);
+    printf("\n ==========client:received from %s =============\n",ip_addr);
+    printf("%s\n\n",buf);
     close(sockfd);
+    return 0;
 
 }
 int main(int argc, char *argv[])
