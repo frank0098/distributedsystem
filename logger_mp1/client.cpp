@@ -35,7 +35,7 @@ int distrbuted_grep(const char* ip_addr,const char* cmd){
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
-
+    cout<<"0"<<endl;
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -44,7 +44,7 @@ int distrbuted_grep(const char* ip_addr,const char* cmd){
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
+    cout<<"1"<<endl;
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
@@ -61,6 +61,7 @@ int distrbuted_grep(const char* ip_addr,const char* cmd){
 
         break;
     }
+    cout<<"2"<<endl;
 
     if (p == NULL) {
         fprintf(stderr, "client: failed to connect\n");
@@ -108,6 +109,7 @@ int main(int argc, char *argv[])
         strcat(cmd_buf," ");
         strcat(cmd_buf,argv[2]);
         for(auto ip:ip_addrs){
+            cout<<ip<<endl;
             distrbuted_grep(ip.c_str(),cmd_buf);
         }
     }
