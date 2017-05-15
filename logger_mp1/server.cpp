@@ -12,7 +12,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <iostream>
+#include <string.h>
 #include "utility.h"
+
 using namespace std;
 
 #define BACKLOG 10
