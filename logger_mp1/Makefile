@@ -22,4 +22,4 @@ utility.o: utility.cpp utility.h
 	$(CC) $(CFLAGS) utility.cpp 
 
 clean:
-	rm *.o server.out client.out
+	rm -f *.o *.out
