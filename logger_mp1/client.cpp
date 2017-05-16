@@ -28,15 +28,15 @@ int distrbuted_grep(const char* ip_addr,const char* cmd){
     sockfd=get_connection(ip_addr);
     if(sockfd==-1){
         perror("socket error\n");
-        exit(1);
+        return -1;
     }
     if(send(sockfd,cmd,strlen(cmd),0)==-1){
         perror("send error\n");
-        exit(1);
+       return -1;
     }
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv\n");
-        exit(1);
+        return -1;
     }
     buf[numbytes] = '\0';
     printf("\n ==========client:received from %s =============\n",ip_addr);
