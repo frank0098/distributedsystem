@@ -24,5 +24,5 @@ for IP in "${SERVER_LIST[@]}"
 do
 	echo "====="$IP"======"
 	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1 \
-	&& git reset --hard && git pull && make && nohup ./server.out&"
+	&& git pull && make && nohup ./server.out&"
 done
