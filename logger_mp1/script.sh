@@ -23,6 +23,6 @@ git push origin master
 for IP in "${SERVER_LIST[@]}"
 do
 	echo "====="$IP"======"
-	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sudo apt-get install g++ && cd distributedsystem/logger_mp1 \
-	&& git reset --hard && git pull && make && ./server.out&"
+	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1 \
+	&& git reset --hard && git pull && make && nohup ./server.out&"
 done
