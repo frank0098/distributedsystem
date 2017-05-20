@@ -19,7 +19,6 @@ using namespace std;
 
 #define BACKLOG 10
 #define PORT "3490"
-#define MAXDATASIZE 2000000
 
 void sigchld_handler(int s){
 	int saved_errno=errno;
@@ -27,46 +26,18 @@ void sigchld_handler(int s){
 	errno=saved_errno;
 }
 int main(void){
-	int sockfd,new_fd,rv,numbytes, yes=1;
-	struct addrinfo hints,*servinfo,*p;
-	struct sockaddr_storage their_addr;
-	socklen_t sin_size;
+	int sockfd;
+	sockfd=server_setup_connection();
+
 	struct sigaction sa;
-	char s[INET6_ADDRSTRLEN];
-	char buf[MAXDATASIZE];
-	memset(&hints,0,sizeof(hints));
-	hints.ai_family=AF_UNSPEC;
-	hints.ai_socktype=SOCK_STREAM;
-	hints.ai_flags=AI_PASSIVE;
-	if((rv=getaddrinfo(NULL,PORT,&hints,&servinfo))!=0){
-		fprintf(stderr, "getaddrinfo: %s\n",gai_strerror(rv));
-		return 1;
-	}
-	for(p=servinfo;p!=NULL;p=p->ai_next){
-		if((sockfd=socket(p->ai_family,p->ai_socktype,p->ai_protocol))==-1){
-			perror("server socket");
-			continue;
-		}
-		if(setsockopt(sockfd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(int))==-1){
-			perror("setsockopt");
-			exit(1);
-		}
-		if(::bind(sockfd,p->ai_addr,p->ai_addrlen)==-1){
-			close(sockfd);
-			perror("server:bind");
-			continue;
-		}
-		break;
-	}
-	freeaddrinfo(servinfo);
-	if(!p){
-		fprintf(stderr, "server:failed to bind\n" );
-		exit(1);
-	}
+
+	// char buf[MAXDATASIZE];
+
 	if(listen(sockfd,BACKLOG)==-1){
 		perror("listen");
 		exit(1);
 	}
+
 	sa.sa_handler=sigchld_handler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags=SA_RESTART;
@@ -75,41 +46,14 @@ int main(void){
 		exit(1);
 	}
 	cout<<"server:waiting for connections"<<endl;
-	while(1){
-		sin_size=sizeof(their_addr);
-		new_fd=accept(sockfd,(struct sockaddr*)&their_addr,&sin_size);
-		if(new_fd==-1){
-			perror("accept");
-			continue;
-		}
-		inet_ntop(their_addr.ss_family,get_in_addr((struct sockaddr *)&their_addr),s,sizeof(s));
-		cout<<"server:got connection from"<<s<<endl;
-		cout<<sizeof(buf)<<endl;
-		if((numbytes=recv(new_fd,buf,sizeof(buf)-1,0))==-1){
-			perror("recv");
-			exit(1);
-		}
-		buf[numbytes]='\0';
-		cout<<"server received:"<<buf<<endl;
-
-		const string grep_result=grep_server(buf,"logpath.cfg");
-		if(!fork()){
-			close(sockfd);
-			 // char* thing_to_send=new char[grep_result.size()+1];
-			 // strcpy(thing_to_send,grep_result.c_str());
-			 // thing_to_send[grep_result.size()]='\0';
-			const char* thing_to_send = grep_result.c_str();
-
-			if(send(new_fd,thing_to_send,strlen(thing_to_send),0)==-1){
-				perror("nmh");
-				cout<<"what?"<<endl;
-			}
-			// delete[] thing_to_send;
-			close(new_fd);
-			exit(0);
-		}
-		close(new_fd);
+	try{
+		serve_forever(sockfd);
 	}
+	catch(std::runtime_error err){
+        cout<<"runtime_error"<<err.what()<<endl;
+    }
+	close(sockfd);
+
 	return 0;
 
 }
