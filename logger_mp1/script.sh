@@ -23,5 +23,7 @@ git push origin master
 for IP in "${SERVER_LIST[@]}"
 do
 	echo "====="$IP"======"
-	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1  && git pull && make && nohup ./server.out&"
+	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem/logger_mp1;git pull;make; nohup ./server.out > /dev/null 2>&1 &'"
+	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1  && git pull && make && nohup ./server.out&"
+
 done
