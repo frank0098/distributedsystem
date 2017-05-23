@@ -3,7 +3,7 @@
 loggerThread::loggerThread(std::string path):_log_path(path),*_wq(new wqueue<WorkItem>),_up(true){
 
 }
-~loggerThread::loggerThread(){
+loggerThread::~loggerThread(){
 	_up=false;
 	loggerThread::run();
 }

@@ -4,6 +4,14 @@ void network::network(string hostname):connected(false),_hostname(hostname),_soc
 
 }
 
+bool network_server::server_send(int sockfd,msg_t msgtype){
+	if(send(sockfd,&msgtype,sizeof(msgtype),0)==-1){
+		perror("send error");
+		return false;
+	}
+	return true;
+}
+
 void network_server::connect(){
 	int sockfd,yes=1,rv;
 	struct addrinfo hints,*servinfo,*p;
@@ -119,4 +127,8 @@ msg_t network::recv_msg(){
 		return msg_t::UNKNOWN;
 	}
 	return msgtype;
+}
+
+int getfd(){
+	return _fd;
 }

@@ -1,7 +1,9 @@
 #ifndef DETECTOR_H
 #define DETECTOR_H
+#include "thread.h"
+#include "network.h"
 
-class detector{
+class detector::public Thread{
 public:
 
 	void run();

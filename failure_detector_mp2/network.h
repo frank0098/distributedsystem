@@ -35,6 +35,7 @@ enum msg_t {
 class network_server:public network{
 public:
 	void connect() override;
+	static void server_send(int sockfd,msg_t msgtype);
 };
 
 class network_client:public network{
@@ -49,6 +50,7 @@ public:
 	virtual void connect()=0;
 	bool send_msg(msg_t type);
 	msg_t recv_msg();
+	int get_fd();
 private:
 	bool connected;
 	int _sockfd;

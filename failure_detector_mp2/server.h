@@ -1,17 +1,15 @@
 #ifndef SERVER_H
 #define SERVER_H
 #include "thread.h"
+#include "network.h"
 
-class server::public Thread{
+class server{
 public:
 	void run();
 private:
-	void receiving();
-	logger* _log;
-	detector* _det;
-	dissemination* _dis;
-	const int _machine_count;
-	vector<string> _members;
+	logger* _logger;
+	network* _nw;
+
 
 };
 #endif
