@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <pwd.h>
 enum msg_t {
+	UNKNOWN=-1;
 	JOIN=0,
 	EXIT=1,
 	PING=2,
@@ -29,15 +30,27 @@ enum msg_t {
 	INDIRECT_PING=4,
 	INDIRECT_ACK=5
 };
-#define SERVER_PORT 7000
-#define DETECTOR_PORT 7001
+#define PORT 7000
+
+class network_server:public network{
+public:
+	void connect() override;
+};
+
+class network_client:public network{
+public:
+	void connect() override;
+};
+
+
 class network{
 public:
-	network()=default;
-	void get_connection();
-	void send_msg(msg_t type);
+	network(string hostname);
+	virtual void connect()=0;
+	bool send_msg(msg_t type);
 	msg_t recv_msg();
 private:
+	bool connected;
 	int _sockfd;
 	string _hostname;
 };
