@@ -1,0 +1,30 @@
+SWIM
+
+Detection
+	-client
+		-send JOIN to other member in group
+		-send PING to #N machines in #T timeperiod
+			-waiting feedback ACK
+			-If receive ACK -success
+			-Else send PING2 to other #K machines
+				-If receive ACK2 --success
+				-Else: Mark That machine fail
+					   Dissemination
+		-send EXIT to other member in group
+
+	-server
+		-If receive PING from IP0:send ACK to IP0
+		-If receive PING2 from IP0 with IPs:
+			-for ip : IPs
+				send PING to ip
+				waiting
+				if success
+					-stop the loop
+					-sned ACK2
+			FAIL
+		if receive JOIN from IP add IP in membership list
+		if receive EXIT remove IP from membership list
+
+
+Disemination
+	-Multicast membership list
