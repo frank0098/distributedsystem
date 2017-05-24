@@ -19,10 +19,15 @@ void server_addr_read_config(string config_file_path,std::list<string>& all_memb
 
 
 membership::membership(){
-	_logger=new loggerThread("$HOME/log");
+	char buf[200];
+	struct passwd *pw = getpwuid(getuid());
+	const char *homedir = pw->pw_dir;
+	strcpy(buf,homedir);
+	strcat(buf,"/log");
+	_logger=new loggerThread(buf);
 	_sv=new server(this->_logger);
 	_dt=new detector(&(this->_members),&(this->_alive_members),this->_logger);
-	_ds=new dissemination(this->_logger);
+	// _ds=new dissemination(this->_logger);
 	server_addr_read_config("server.cfg",_members);
 }
 
@@ -30,14 +35,17 @@ void membership::start(){
 	_sv->start();
 	_logger->start();
 	_dt->start();
+	while(true){
+		
+	}
 }
 
 membership::~membership(){
-	_sv->join();
-	_logger->join();
-	_dt->join();
-	delete _sv;
-	delete _logger;
-	delete _ds;
-	delete _dt;
+	// _sv->join();
+	// _logger->join();
+	// _dt->join();
+	// delete _sv;
+	// delete _logger;
+	// delete _ds;
+	// delete _dt;
 }

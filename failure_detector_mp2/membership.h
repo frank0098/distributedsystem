@@ -7,6 +7,11 @@
 #include "detector.h"
 #include "logger.h"
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+
+
 
 class membership
 {

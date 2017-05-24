@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
+#include <fstream>
 // #include "thread.h"
 #include "membership.h"
 // class MyThread : public Thread
@@ -18,6 +20,14 @@
 
 int main(int argc, char** argv)
 {
+
+  //   ofstream myfile;
+  // myfile.open ("example.txt");
+  // myfile << "Writing this to a file.\n";
+  // myfile.close();
+  //   cout<<"end"<<endl;
+
+
     membership* mb=new membership();
     mb->start();
     delete mb;

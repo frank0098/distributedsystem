@@ -13,7 +13,8 @@ inline const std::string currentDateTime() {
 }
 
 loggerThread::loggerThread(std::string path):_log_path(path),_wq(new wqueue<WorkItem*>),_up(true){
-	ofstream newFile(path);
+	ofstream newFile;
+	newFile.open(_log_path);
 	newFile<<"["<<currentDateTime()<<"]"<<"====Logger Start===="<<endl;
 	newFile.close();
 }
@@ -23,9 +24,11 @@ loggerThread::~loggerThread(){
 }
 void* loggerThread::run(){
 	while(true){
+		// cout<<"run"<<endl;
 		WorkItem* item=(WorkItem*)(_wq->remove());
 		loggerThread::write_log(item->m_message);
 		delete item;
+		// cout<<"run finished"<<endl;
 	}
 }
 
@@ -42,5 +45,6 @@ void loggerThread::write_log(std::string content){
 	std::ofstream outfile;
   	outfile.open(_log_path, std::ios_base::app);
   	outfile<<"["<<currentDateTime()<<"] " << content<<endl;
+  	std::cout<<content<<endl;
   	outfile.close();
 }

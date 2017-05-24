@@ -16,6 +16,7 @@ private:
 	std::list<std::string> *_members;
 	std::list<std::string> *_alive_members;
 	loggerThread* _logger;
-	std::vector<network_client*> _nw;
+	// std::vector<network_client*> _nw;
+	network_udp *_nw;
 };
 #endif

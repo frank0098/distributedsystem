@@ -11,7 +11,7 @@ public:
 	void* run();
 private:
 	loggerThread* _lg;
-	network* _nw;
+	network_udp* _nw;
 
 
 };

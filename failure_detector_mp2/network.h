@@ -33,7 +33,9 @@ enum msg_t {
 	INDIRECT_PING=4,
 	INDIRECT_ACK=5
 };
-#define PORT "7000"
+#define PORT "5000"
+#define SERVERPORT "5001"
+#define DETECTORPORT "5003"
 #define BACKLOG 10
 
 class network{
@@ -41,10 +43,10 @@ public:
 	network(std::string hostname);
 	virtual void connect()=0;
 	bool send_msg(msg_t type);
-	msg_t recv_msg();
 	int get_fd();
 	bool is_connected();
 	std::string hostname();
+	void disconnect();
 protected:
 	bool _connected;
 	std::string _hostname;
@@ -56,16 +58,31 @@ public:
 	network_server();
 	void connect() override;
 	static bool server_send(int sockfd,msg_t msgtype);
+	static msg_t recv_msg(int sockfd);
 };
 
 class network_client:public network{
 public:
 	network_client(std::string hostname);
 	void connect() override;
+	msg_t recv_msg();
 };
 
-extern void *get_in_addr(struct sockaddr *sa);
+class network_udp:public network{
+public:
+	network_udp(const char* port);
+	void connect();
+	static bool send_msg(msg_t msgtype,const char* port,const char* ip_addr);
+	msg_t recv_msg(char* ip_addr);
+private:
+	const char* _PORT;
 
+};
+
+
+extern void *get_in_addr(struct sockaddr *sa);
+using std::cout;
+using std::endl;
 
 
 

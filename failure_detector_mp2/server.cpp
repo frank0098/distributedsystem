@@ -1,31 +1,23 @@
 #include "server.h"
 server::server(loggerThread* lg):_lg(lg){
-	_nw=new network_server();
+	_lg->add_write_log_task("server start");
+	_nw=new network_udp(SERVERPORT);
 	_nw->connect();
 }
 server::~server(){
-	
+	_nw->disconnect();
+	delete _nw;
 }
 void* server::run(){
-	struct sockaddr_storage their_addr;
-	int new_fd;
-	char s[INET6_ADDRSTRLEN];
-	socklen_t sin_size;
+
 	while(1){
-		sin_size=sizeof(their_addr);
-		new_fd=accept(_nw->get_fd(),(struct sockaddr*)&their_addr,&sin_size);
-		if(new_fd==-1){
-			perror("accept");
-			continue;
-		}
-		inet_ntop(their_addr.ss_family,get_in_addr((struct sockaddr *)&their_addr),s,sizeof(s));
-		cout<<"server:got connection from"<<s<<endl;
-
-
-		msg_t msg_type=_nw->recv_msg();
+		char source[INET6_ADDRSTRLEN];
+		msg_t msg_type=_nw->recv_msg(source);
+		_lg->add_write_log_task("SERVER:  recv msg from "+string(source));
 		msg_t response_type=msg_t::UNKNOWN;
-		if(!fork()){
-				close(_nw->get_fd());
+		// if(!fork())
+		{
+				// _nw->disconnect();
 				if(msg_type==msg_t::JOIN){
 					response_type=msg_t::ACK;
 				}
@@ -44,12 +36,10 @@ void* server::run(){
 					response_type=msg_t::ACK;
 
 				}
-				network_server::server_send(new_fd,response_type);
-				_lg->add_write_log_task("SEND ACK TO "+string(s));
-				close(new_fd);
-				exit(0);
+				cout<<"send ack!!aaa "<<source<<endl;
+				network_udp::send_msg(response_type,DETECTORPORT,source);
+				_lg->add_write_log_task("SERVER: SEND ACK TO "+string(source));
 			}
+	}
 
-		}
-	close(new_fd);
 }
