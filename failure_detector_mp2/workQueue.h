@@ -1,14 +1,13 @@
 #include <pthread.h>
 #include <list>
+#include <string>
  
 using namespace std;
  
-class WorkItem
+struct WorkItem
 {
     string m_message;
     int    m_number;
- 
-  public:
     WorkItem(const char* message, int number) 
           : m_message(message), m_number(number) {}
     ~WorkItem() {}

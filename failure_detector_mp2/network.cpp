@@ -1,6 +1,13 @@
 #include "network.h"
 
-void network::network(string hostname):connected(false),_hostname(hostname),_sockfd(-1){
+network::network(std::string hostname):_connected(false),_hostname(hostname),_sockfd(-1){
+
+}
+network_server::network_server():network(""){
+
+}
+
+network_client::network_client(std::string hostname):network(hostname){
 
 }
 
@@ -10,6 +17,21 @@ bool network_server::server_send(int sockfd,msg_t msgtype){
 		return false;
 	}
 	return true;
+}
+
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void sigchld_handler(int s){
+	int saved_errno=errno;
+	while(waitpid(-1,NULL,WNOHANG)>0);
+	errno=saved_errno;
 }
 
 void network_server::connect(){
@@ -74,7 +96,7 @@ void network_client::connect(){
             continue;
         }
 
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+        if (::connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sockfd);
             perror("client: connect");
             continue;
@@ -113,7 +135,7 @@ void network_client::connect(){
 }
 
 bool network::send_msg(msg_t type){
-	if(send(_sockfd,&msgtype,sizeof(msgtype),0)==-1){
+	if(send(_sockfd,&type,sizeof(msg_t),0)==-1){
 		perror("send error");
 		return false;
 	}
@@ -122,13 +144,19 @@ bool network::send_msg(msg_t type){
 
 msg_t network::recv_msg(){
 	msg_t msgtype;
-	if(recv(_sockfd,&msgtype,sizeof (msgtype),0)<=0){
+	if(recv(_sockfd,&msgtype,sizeof (msg_t),0)<=0){
 		perror("receive type fail");
 		return msg_t::UNKNOWN;
 	}
 	return msgtype;
 }
 
-int getfd(){
-	return _fd;
+int network::get_fd(){
+	return _sockfd;
+}
+bool network::is_connected(){
+	return _connected;
+}
+std::string network::hostname(){
+	return _hostname;
 }

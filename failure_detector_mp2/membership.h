@@ -1,23 +1,25 @@
 #ifndef MEMBERSHIP_H
 #define MEMBERSHIP_H
 
+
 #include "server.h"
 #include "dissemination.h"
 #include "detector.h"
 #include "logger.h"
+#include <arpa/inet.h>
 
 class membership
 {
 public:
 	membership(void);
 	~membership();
+	void start();
 private:
 	server* _sv;
 	detector* _dt;
 	dissemination* _ds;
-	logger* _logger;
-	const int _machine_count;
-	vector<string> _members;
-	vector<string> _alive_members;
+	loggerThread* _logger;
+	std::list<string> _members;
+	std::list<string> _alive_members;
 };
 #endif

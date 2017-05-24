@@ -1,18 +1,19 @@
 #include "server.h"
-server::server(){
-
+server::server(loggerThread* lg):_lg(lg){
+	_nw=new network_server();
+	_nw->connect();
 }
 server::~server(){
-
+	
 }
-void server::run(){
+void* server::run(){
 	struct sockaddr_storage their_addr;
 	int new_fd;
 	char s[INET6_ADDRSTRLEN];
 	socklen_t sin_size;
 	while(1){
 		sin_size=sizeof(their_addr);
-		new_fd=accept(_nw->getfd(),(struct sockaddr*)&their_addr,&sin_size);
+		new_fd=accept(_nw->get_fd(),(struct sockaddr*)&their_addr,&sin_size);
 		if(new_fd==-1){
 			perror("accept");
 			continue;
@@ -21,36 +22,34 @@ void server::run(){
 		cout<<"server:got connection from"<<s<<endl;
 
 
-		msg_t msg_type=get_msg_type(new_fd);
-
+		msg_t msg_type=_nw->recv_msg();
+		msg_t response_type=msg_t::UNKNOWN;
 		if(!fork()){
-				close(sockfd);
+				close(_nw->get_fd());
 				if(msg_type==msg_t::JOIN){
-					network::server_send(new_fd,msg_type::ACK);
+					response_type=msg_t::ACK;
 				}
-				else if(msg_type==msg_type::EXIT){
-					network::server_send(new_fd,msg_type::ACK);
+				else if(msg_type==msg_t::EXIT){
+					response_type=msg_t::ACK;
 				}
-				else if(msg_type==msg_type::PING){
-					network::server_send(new_fd,msg_type::ACK);
+				else if(msg_type==msg_t::PING){
+					response_type=msg_t::ACK;
 				}
-				else if(msg_type==msg_type::INDIRECT_PING){
-					network::server_send(new_fd,msg_type::INDIRECT_ACK);
+				else if(msg_type==msg_t::INDIRECT_PING){
+					response_type=msg_t::INDIRECT_ACK;
 				}
-				else if(msg_type==msg_type::INDIRECT_ACK){
+				else if(msg_type==msg_t::INDIRECT_ACK){
 
 
+					response_type=msg_t::ACK;
 
 				}
-				else{
-					network::server_send(new_fd,msg_type::UNKNOWN);
-				}
+				network_server::server_send(new_fd,response_type);
+				_lg->add_write_log_task("SEND ACK TO "+string(s));
 				close(new_fd);
 				exit(0);
 			}
 
 		}
-
-		close(new_fd);
-	}
+	close(new_fd);
 }

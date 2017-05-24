@@ -4,19 +4,21 @@
 #include "workQueue.h"
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <stdio.h>
+#include <time.h>
 
-class loggerThread::public Thread{
+class loggerThread:public Thread{
 public:
 	loggerThread(std::string path);
-	~loggerThread(){
-	}
-	void run();
+	~loggerThread();
+	void* run();
 	void add_write_log_task(std::string params);
 
 private:
 	void write_log(std::string content);
 	string _log_path;
-	wqueue<WorkItem> *_wq;
+	wqueue<WorkItem*> *_wq;
 	bool _up;
 
 };

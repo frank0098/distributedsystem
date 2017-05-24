@@ -2,12 +2,15 @@
 #define SERVER_H
 #include "thread.h"
 #include "network.h"
-
-class server{
+#include "logger.h"
+#include <arpa/inet.h>
+class server:public Thread{
 public:
-	void run();
+	server(loggerThread *lg);
+	~server();
+	void* run();
 private:
-	logger* _logger;
+	loggerThread* _lg;
 	network* _nw;
 
 
