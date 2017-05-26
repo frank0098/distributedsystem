@@ -17,20 +17,22 @@ void* detector::run(){
 	cout<<"start running"<<endl;
 	char source[INET6_ADDRSTRLEN];
 	for(auto m:*_members){
-		cout<<m<<endl;
 		if(!network_udp::send_msg(msg_t::JOIN,SERVERPORT,m.c_str())){
 			_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
 			continue;
 		}
-		_logger->add_write_log_task("Detector: SEND JOIN TO "+m);
+		// _logger->add_write_log_task("Detector: SEND JOIN TO "+m);
 		msg_t msgtype = _nw->recv_msg(source);
+		// cout<<"detector recv "<<msgtype<<endl;
 		if(msgtype==msg_t::ACK){
-			_logger->add_write_log_task("Detector: recv msg from "+string(source));
+			_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
+			_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 			_am->add(string(source));
-		}
+		}   
 		else{
-			_logger->add_write_log_task("Detector: recv unknown msg from "+string(source));
+			_logger->add_write_log_task("Detector: === FATAL ERROR === recv unknown msg from "+m);
 		}
+		source[0]='\0';
 	}
 
 	// RUN
@@ -43,6 +45,7 @@ void* detector::run(){
 			// mark it failure. dissemination to ALL
 
 	while(1){
+		source[0]='\0';
 		std::vector<string> alivemembers=_am->get_alive_member();
 		for(auto m:alivemembers){
 			// if(network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str()))
@@ -51,15 +54,20 @@ void* detector::run(){
 				// continue;
 			}
 			network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
+			
+			#if DEBUG
 			_logger->add_write_log_task("Detector: SEND PING TO "+m);
+			#endif
+
 			msg_t msgtype=_nw->recv_msg(source);
 			// if timeout
 			if(msgtype!=msg_t::ACK){
+				_logger->add_write_log_task("Detector: "+m+" might have FAILED.SEND INDIRECT_PING");
 				bool failflag=true;
 				std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 				for(auto om:other_machines){
 					network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,om.c_str());
-					_logger->add_write_log_task("Detector: SEND INDIRECTPING TO "+om);
+					
 					msg_t indirectmsgtype = _nw->recv_msg(source);
 					if(msgtype==msg_t::INDIRECT_ACK){
 						failflag=false;
@@ -71,7 +79,6 @@ void* detector::run(){
 					for(auto om:alivemembers){
 						if(om!=m){
 							network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
-							_logger->add_write_log_task("Detector: SEND FAIL TO "+om);
 							_nw->recv_msg(source);
 							char tmp[INET6_ADDRSTRLEN];
 							strcpy(tmp,m.c_str());

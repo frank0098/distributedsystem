@@ -15,6 +15,7 @@ public:
 	void remove(std::string ip);
 	std::vector<std::string> ramdom_select_K(int K);
 	std::vector<std::string> get_alive_member();
+	std::string get_alive_member_list();
 
 private:
 	std::vector<std::string> _am;

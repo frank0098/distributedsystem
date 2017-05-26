@@ -2,27 +2,29 @@ CC=g++
 
 CFLAGS=-c -Wall -std=c++11
 
+OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o
+
 .PHONY: all clean
 
-all: failure_detector
+all: failure_detector 
 
-failure_detector:main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o
-	$(CC) main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o -o failure_detector.out
+failure_detector:$(OBJECTS)
+	$(CC) $(OBJECTS) $(DEBUG) -o failure_detector.out
 
-main.o: main.cpp membership.o
+main.o: main.cpp membership.h
 	$(CC) $(CFLAGS) main.cpp
 
-membership.o: membership.cpp membership.h server.o dissemination.o detector.o network.o logger.o thread.o member.o
+membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h
 	$(CC) $(CFLAGS) membership.cpp
 
-detector.o: detector.cpp detector.h network.o logger.o thread.o member.o
-	$(CC) $(CFLAGS) detector.cpp
+detector.o: detector.cpp detector.h network.h logger.h thread.h member.h
+	$(CC) $(CFLAGS) $(DEBUG) detector.cpp
 
-dissemination.o: dissemination.cpp dissemination.h network.o logger.o
+dissemination.o: dissemination.cpp dissemination.h network.h logger.h
 	$(CC) $(CFLAGS) dissemination.cpp
 
-server.o: server.cpp server.h network.o logger.o thread.o member.o
-	$(CC) $(CFLAGS) server.cpp
+server.o: server.cpp server.h network.h logger.h thread.h member.h
+	$(CC) $(CFLAGS) $(DEBUG) server.cpp
 
 network.o: network.cpp network.h
 	$(CC) $(CFLAGS) network.cpp

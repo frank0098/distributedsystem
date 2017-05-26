@@ -13,7 +13,8 @@ void* server::run(){
 	while(1){
 		char source[INET6_ADDRSTRLEN];
 		msg_t msg_type=_nw->recv_msg(source);
-		_lg->add_write_log_task("SERVER:  recv msg from "+string(source));
+		// _lg->add_write_log_task("SERVER:  recv msg from "+string(source));
+		// cout<<"server recv msg_type "<<msg_type<<endl;
 		msg_t response_type=msg_t::UNKNOWN;
 		// if(!fork())
 		{
@@ -23,6 +24,8 @@ void* server::run(){
 				}
 				else if(msg_type==msg_t::EXIT){
 					response_type=msg_t::ACK;
+					_lg->add_write_log_task("SERVER: Remove "+string(source)+" From membership list.");
+					_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 					_am->remove(string(source));
 				}
 				else if(msg_type==msg_t::PING){
@@ -42,12 +45,17 @@ void* server::run(){
 					network_udp::send_msg(response_type,DETECTORPORT,source);
 					char tmp_ip_addr[INET6_ADDRSTRLEN];
 					_nw->recv_msg(tmp_ip_addr,INET6_ADDRSTRLEN,source);
+
+					_lg->add_write_log_task("SERVER: Remove "+string(tmp_ip_addr)+" From membership list.");
+					_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 					_am->remove(string(tmp_ip_addr));
 
 				}
-				// cout<<"send ack!!aaa "<<source<<endl;
+				// cout<<"server send "<<response_type<<endl;
+				#if DEBUG
+				_lg->add_write_log_task("SERVER:  send ACK to "+string(source));
+				#endif
 				network_udp::send_msg(response_type,DETECTORPORT,source);
-				_lg->add_write_log_task("SERVER: SEND ACK TO "+string(source));
 			}
 	}
 
