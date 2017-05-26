@@ -16,6 +16,7 @@
 #include <fstream>
 #include <netdb.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -23,6 +24,7 @@
 #include <pwd.h>
 #include <string>
 #include <signal.h>
+
 
 enum msg_t {
 	UNKNOWN=0,
