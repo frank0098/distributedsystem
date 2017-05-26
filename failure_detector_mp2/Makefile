@@ -9,7 +9,7 @@ OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logge
 all: failure_detector 
 
 failure_detector:$(OBJECTS)
-	$(CC) $(OBJECTS) $(DEBUG) -o -pthread failure_detector.out
+	$(CC) $(OBJECTS) $(DEBUG) -pthread -o failure_detector.out
 
 main.o: main.cpp membership.h
 	$(CC) $(CFLAGS) main.cpp
@@ -33,7 +33,7 @@ logger.o: logger.cpp logger.h workQueue.h
 	$(CC) $(CFLAGS) logger.cpp
 
 thread.o: thread.cpp thread.h
-	$(CC) $(CFLAGS) thread.cpp
+	$(CC) $(CFLAGS) -pthread thread.cpp
 
 member.o: member.cpp member.h
 	$(CC) $(CFLAGS) member.cpp
