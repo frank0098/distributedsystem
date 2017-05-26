@@ -9,6 +9,7 @@
 #include <vector>
 #include <time.h>
 #include <algorithm>
+#include <iostream>
 
 class alive_member{
 public:

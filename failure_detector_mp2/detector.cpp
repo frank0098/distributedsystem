@@ -25,9 +25,12 @@ void* detector::run(){
 		msg_t msgtype = _nw->recv_msg(source);
 		// cout<<"detector recv "<<msgtype<<endl;
 		if(msgtype==msg_t::ACK){
+			_am->add(m);
 			_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
-			_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
-			_am->add(string(source));
+			string cm=_am->get_alive_member_list();
+			// cout<<cm<<endl;
+			_logger->add_write_log_task("Detector: current members: "+cm);
+			
 		}   
 		else{
 			_logger->add_write_log_task("Detector: === FATAL ERROR === recv unknown msg from "+m);
@@ -47,6 +50,7 @@ void* detector::run(){
 	while(1){
 		source[0]='\0';
 		std::vector<string> alivemembers=_am->get_alive_member();
+		// cout<<alivemembers.size()<<endl;
 		for(auto m:alivemembers){
 			// if(network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str()))
 			{
