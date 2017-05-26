@@ -1,7 +1,7 @@
 #include "server.h"
-server::server(loggerThread* lg):_lg(lg){
+server::server(loggerThread* lg,alive_member* am):_lg(lg),_am(am){
 	_lg->add_write_log_task("server start");
-	_nw=new network_udp(SERVERPORT);
+	_nw=new network_udp(SERVERPORT,false);
 	_nw->connect();
 }
 server::~server(){
@@ -23,6 +23,7 @@ void* server::run(){
 				}
 				else if(msg_type==msg_t::EXIT){
 					response_type=msg_t::ACK;
+					_am->remove(string(source));
 				}
 				else if(msg_type==msg_t::PING){
 					response_type=msg_t::ACK;
@@ -36,7 +37,15 @@ void* server::run(){
 					response_type=msg_t::ACK;
 
 				}
-				cout<<"send ack!!aaa "<<source<<endl;
+				else if(msg_type==msg_t::FAIL){
+					response_type=msg_t::ACK;
+					network_udp::send_msg(response_type,DETECTORPORT,source);
+					char tmp_ip_addr[INET6_ADDRSTRLEN];
+					_nw->recv_msg(tmp_ip_addr,INET6_ADDRSTRLEN,source);
+					_am->remove(string(tmp_ip_addr));
+
+				}
+				// cout<<"send ack!!aaa "<<source<<endl;
 				network_udp::send_msg(response_type,DETECTORPORT,source);
 				_lg->add_write_log_task("SERVER: SEND ACK TO "+string(source));
 			}

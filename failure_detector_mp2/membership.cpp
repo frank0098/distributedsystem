@@ -25,8 +25,10 @@ membership::membership(){
 	strcpy(buf,homedir);
 	strcat(buf,"/log");
 	_logger=new loggerThread(buf);
-	_sv=new server(this->_logger);
-	_dt=new detector(&(this->_members),&(this->_alive_members),this->_logger);
+	_am=new alive_member();
+	_sv=new server(this->_logger,_am);
+	_dt=new detector(&(this->_members),this->_am,this->_logger);
+
 	// _ds=new dissemination(this->_logger);
 	server_addr_read_config("server.cfg",_members);
 }
@@ -41,11 +43,11 @@ void membership::start(){
 }
 
 membership::~membership(){
-	// _sv->join();
-	// _logger->join();
-	// _dt->join();
-	// delete _sv;
-	// delete _logger;
-	// delete _ds;
-	// delete _dt;
+	_sv->join();
+	_logger->join();
+	_dt->join();
+	delete _sv;
+	delete _logger;
+	delete _ds;
+	delete _dt;
 }

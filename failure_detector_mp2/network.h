@@ -25,13 +25,14 @@
 #include <signal.h>
 
 enum msg_t {
-	UNKNOWN=-1,
-	JOIN=0,
-	EXIT=1,
-	PING=2,
-	ACK=3,
-	INDIRECT_PING=4,
-	INDIRECT_ACK=5
+	UNKNOWN=0,
+	JOIN=1,
+	EXIT=2,
+	PING=3,
+	ACK=4,
+	INDIRECT_PING=5,
+	INDIRECT_ACK=6,
+	FAIL=7
 };
 #define PORT "5000"
 #define SERVERPORT "5001"
@@ -70,12 +71,15 @@ public:
 
 class network_udp:public network{
 public:
-	network_udp(const char* port);
+	network_udp(const char* port,bool stm);
 	void connect();
 	static bool send_msg(msg_t msgtype,const char* port,const char* ip_addr);
 	msg_t recv_msg(char* ip_addr);
+	void recv_msg(char* msg,size_t msg_size,char* ip_addr);
+	static bool send_msg(const char* msg,size_t msg_size,const char* port,const char* ip_addr);
 private:
 	const char* _PORT;
+	bool _settimeout;
 
 };
 

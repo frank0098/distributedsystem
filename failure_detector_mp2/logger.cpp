@@ -45,6 +45,6 @@ void loggerThread::write_log(std::string content){
 	std::ofstream outfile;
   	outfile.open(_log_path, std::ios_base::app);
   	outfile<<"["<<currentDateTime()<<"] " << content<<endl;
-  	std::cout<<content<<endl;
+  	// std::cout<<content<<endl;
   	outfile.close();
 }

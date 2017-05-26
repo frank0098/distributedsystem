@@ -6,10 +6,13 @@
 #include "dissemination.h"
 #include "detector.h"
 #include "logger.h"
+#include "member.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+
+
 
 
 
@@ -25,6 +28,6 @@ private:
 	dissemination* _ds;
 	loggerThread* _logger;
 	std::list<string> _members;
-	std::list<string> _alive_members;
+	alive_member* _am;
 };
 #endif

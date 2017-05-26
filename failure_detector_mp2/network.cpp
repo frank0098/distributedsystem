@@ -11,8 +11,9 @@ network_client::network_client(std::string hostname):network(hostname){
 
 }
 
-network_udp::network_udp(const char* port):network(""){
+network_udp::network_udp(const char* port,bool stm):network(""){
 	_PORT=port;
+	_settimeout=stm;
 }
 
 bool network_udp::send_msg(msg_t msgtype,const char* port,const char* ip_addr){
@@ -57,6 +58,78 @@ bool network_udp::send_msg(msg_t msgtype,const char* port,const char* ip_addr){
 	close(sockfd);
 	return true;
 }
+
+bool network_udp::send_msg(const char* msg,size_t msg_size,const char* port,const char* ip_addr){
+		int sockfd;
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
+	int numbytes;
+
+	// std::cout<<"send msg to "<<ip_addr<<" "<<port<<std::endl;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	if ((rv = getaddrinfo(ip_addr, port, &hints, &servinfo)) != 0) {
+		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+		return false;
+	}
+
+	// loop through all the results and make a socket
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol)) == -1) {
+			perror("talker: socket");
+			continue;
+		}
+
+		break;
+	}
+
+	if (p == NULL) {
+		fprintf(stderr, "talker: failed to bind socket\n");
+		return false;
+	}
+
+	if ((numbytes = sendto(sockfd, msg, msg_size, 0,
+			 p->ai_addr, p->ai_addrlen)) == -1) {
+		perror("talker: sendto");
+		return false;
+	}
+
+	freeaddrinfo(servinfo);
+	close(sockfd);
+	return true;
+}
+
+void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
+	int numbytes;
+	struct sockaddr_storage their_addr;
+	socklen_t addr_len;
+	msg_t msgtype;
+	addr_len = sizeof their_addr;
+	if ((numbytes = recvfrom(_sockfd, msg, msg_size , 0,
+		(struct sockaddr *)&their_addr, &addr_len)) == -1) {
+		std::cout<<"err recv from"<<std::endl;
+		perror("recvfrom");
+	}
+
+	switch(their_addr.ss_family) {
+        case AF_INET:
+            inet_ntop(AF_INET, &(((struct sockaddr_in *)((struct sockaddr *)&their_addr))->sin_addr),
+                    ip_addr, INET6_ADDRSTRLEN);
+            break;
+
+        case AF_INET6:
+            inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)((struct sockaddr *)&their_addr))->sin6_addr),
+                    ip_addr, INET6_ADDRSTRLEN);
+            break;
+
+        default:
+            strncpy(ip_addr, "Unknown AF", INET6_ADDRSTRLEN);
+    }
+}
+
 msg_t network_udp::recv_msg(char* ip_addr){
 	int numbytes;
 	struct sockaddr_storage their_addr;
@@ -100,6 +173,9 @@ void network_udp::connect(){
 	int sockfd;
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 300000;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4
 	hints.ai_socktype = SOCK_DGRAM;
@@ -115,6 +191,11 @@ void network_udp::connect(){
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
 			perror("listener: socket");
+			continue;
+		}
+
+		if(_settimeout && setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv))<0){
+			perror("setsockopt");
 			continue;
 		}
 
