@@ -24,7 +24,7 @@ for IP in "${SERVER_LIST[@]}"
 do
 	echo "====="$IP"======"
 	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem; git pull; cd ~/distributedsystem/failure_detector_mp2;\
-	make clean; make DEBUG=- DDEBUG; nohup ./failure_detector.out > /dev/null 2>&1 &'"
+	make clean; make DEBUG=-DDEBUG; nohup ./failure_detector.out > /dev/null 2>&1 &'"
 	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1  && git pull && make && nohup ./server.out&"
 
 done
