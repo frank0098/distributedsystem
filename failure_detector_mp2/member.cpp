@@ -23,9 +23,10 @@ std::vector<std::string> alive_member::ramdom_select_K(size_t K){
 	std::vector<std::string> reservoir(_am.size());
 	if(K>=_am.size()) return _am;
 	srand(time(NULL));
-	int i=0;
-	for (int i = 0; i < K; i++)
+	size_t i=0;
+	for (size_t i = 0; i < K; i++)
         reservoir[i] = _am[i];
+    i=0;
 	for(auto x:_am){
 		int j=rand()%(i+1);
 		if(j<K){
