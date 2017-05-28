@@ -7,10 +7,11 @@ server::server(loggerThread* lg,alive_member* am):_lg(lg),_am(am){
 server::~server(){
 	_nw->disconnect();
 	delete _nw;
+	cout<<"end server"<<endl;
 }
 void* server::run(){
 
-	while(1){
+	while(!pause_flag.is_true()){
 		char source[INET6_ADDRSTRLEN];
 		msg_t msg_type=_nw->recv_msg(source);
 		// _lg->add_write_log_task("SERVER:  recv msg from "+string(source));

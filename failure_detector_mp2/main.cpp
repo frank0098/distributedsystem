@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     membership* mb=new membership();
     mb->start();
     delete mb;
+    cout<<"finished!!!"<<endl;
     // MyThread* thread1 = new MyThread();
     // MyThread* thread2 = new MyThread();
     // thread1->start();

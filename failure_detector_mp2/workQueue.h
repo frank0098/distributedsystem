@@ -39,11 +39,18 @@ public:
     }
     T remove() {
         pthread_mutex_lock(&m_mutex);
-        while (m_queue.size() == 0) {
+        while (m_queue.size() == 0 && pause_flag.is_true()) {
             pthread_cond_wait(&m_condv, &m_mutex);
         }
-        T item = m_queue.front();
-        m_queue.pop_front();
+        T item;
+        if(pause_flag.is_true()){
+            item= new WorkItem("wqueue stop waiting...quiting...",0);
+        }
+        else{
+            item = m_queue.front();
+            m_queue.pop_front();
+        }
+        
         pthread_mutex_unlock(&m_mutex);
         return item;
     }

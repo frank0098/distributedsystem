@@ -37,17 +37,23 @@ void membership::start(){
 	_sv->start();
 	_logger->start();
 	_dt->start();
-	while(true){
+	stop_flag.set_true();
+	pause_flag.set_true();
+
+	while(!stop_flag.is_true()){
 		
 	}
+	cout<<"?ASdfasdfas"<<endl;
 }
 
 membership::~membership(){
+	cout<<"end membership"<<endl;
 	_sv->join();
 	_logger->join();
 	_dt->join();
 	delete _sv;
 	delete _logger;
-	delete _ds;
+	delete _am;
+	// delete _ds;
 	delete _dt;
 }

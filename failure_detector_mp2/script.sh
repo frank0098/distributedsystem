@@ -15,17 +15,17 @@ declare -a SERVER_LIST=(35.185.91.83
 # ssh -i ~/.ssh/googlekey ysong71illinois@104.196.216.185
 # ssh -i ~/.ssh/googlekey ysong71illinois@104.196.8.248
 # ssh -i ~/.ssh/googlekey ysong71illinois@35.185.51.148
-# git config credential.helper 'cache --timeout=3000000'
+# git config credential.helper 'cache --timeout=360000000'
 cd ~/Desktop/distributedsystem/
-git add .
-git commit -m $current_date_time
-git push origin master
+# git add .
+# git commit -m $current_date_time
+# git push origin master
 for IP in "${SERVER_LIST[@]}"
 do
 	echo "====="$IP"======"
-	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'sudo reboot'"
-	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem;git reset --hard; git pull; cd ~/distributedsystem/failure_detector_mp2;\
-	make clean; make DEBUG=-DDEBUG; nohup ./failure_detector.out > /dev/null 2>&1 &'"
+	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'sudo reboot'"
+	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem;git reset --hard; git pull; cd ~/distributedsystem/failure_detector_mp2;\
+	# make clean; make DEBUG=-DDEBUG; nohup ./failure_detector.out > /dev/null 2>&1 &'"
 	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1  && git pull && make && nohup ./server.out&"
 
 done

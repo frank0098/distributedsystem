@@ -23,8 +23,8 @@ loggerThread::~loggerThread(){
 	loggerThread::run();
 }
 void* loggerThread::run(){
-	while(true){
-		// cout<<"run"<<endl;
+	while(!pause_flag.is_true()){
+		cout<<"run"<<endl;
 		WorkItem* item=(WorkItem*)(_wq->remove());
 		loggerThread::write_log(item->m_message);
 		delete item;

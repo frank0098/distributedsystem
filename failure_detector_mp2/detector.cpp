@@ -8,6 +8,7 @@ detector::detector(std::list<string> *mem, alive_member *am,loggerThread *lg):_m
 detector::~detector(){
 	_nw->disconnect();
 	delete _nw;
+	cout<<"END DETECTOR"<<endl;
 }	
 void* detector::run(){
 
@@ -47,7 +48,7 @@ void* detector::run(){
 			// else
 			// mark it failure. dissemination to ALL
 
-	while(1){
+	while(!pause_flag.is_true()){
 		source[0]='\0';
 		std::vector<string> alivemembers=_am->get_alive_member();
 		// cout<<alivemembers.size()<<endl;
@@ -95,24 +96,15 @@ void* detector::run(){
 
 			}
 		}
-		// getchar();
-		sleep(5);
+		sleep(DETECTOR_SLEEP_TIME_CONFIG);
 	}
 
-
 	// EXIT
-	// Send Fail to all processes
+	// Send EXIT to all processes
+	for(auto m:_am->get_alive_member()){
+		source[0]='\0';
+		network_udp::send_msg(msg_t::EXIT,SERVERPORT,m.c_str());
+		_nw->recv_msg(source);
+	}
 
-
-	// while(1){
-	// 	for(auto m:*_members){
-	// 		char source[INET6_ADDRSTRLEN];
-	// 		network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
-	// 		_logger->add_write_log_task("Detector: SEND PING TO "+m);
-	// 		_nw->recv_msg(source);
-	// 		_logger->add_write_log_task("Detector: recv msg from "+string(source));
-
-	// 	}
-	// 	getchar();
-	// }
 }

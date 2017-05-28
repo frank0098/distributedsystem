@@ -55,3 +55,25 @@ int Thread::detach()
 pthread_t Thread::self() {
     return m_tid;
 }
+
+
+flag_t::flag_t():_flag(false){
+
+}
+void flag_t::set_true(){
+    std::lock_guard<std::mutex> guard(m);
+    _flag=true;
+}
+void flag_t::set_false(){
+    std::lock_guard<std::mutex> guard(m);
+    _flag=false;
+}
+bool flag_t::is_true(){
+    std::lock_guard<std::mutex> guard(m);
+    return _flag;
+}
+
+
+flag_t stop_flag;
+
+flag_t pause_flag;

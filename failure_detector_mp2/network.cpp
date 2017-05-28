@@ -157,12 +157,6 @@ msg_t network_udp::recv_msg(char* ip_addr){
             strncpy(ip_addr, "Unknown AF", INET6_ADDRSTRLEN);
     }
 
-
-	// inet_ntop(their_addr.ss_family,
-	// 		get_in_addr((struct sockaddr *)&their_addr),
-	// 		ip_addr, sizeof ip_addr);
-	// std::cout<<their_addr<<std::endl;
-	// std::cout<<"recv msg "<<ip_addr<<std::endl;
 	return msgtype;
 
 

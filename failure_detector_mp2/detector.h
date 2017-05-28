@@ -7,6 +7,8 @@
 #include <list>
 #include <string>
 
+#define DETECTOR_SLEEP_TIME_CONFIG 5
+
 class detector:public Thread{
 public:
 	detector(std::list<string> *mem, alive_member *am, loggerThread *lg);
@@ -17,7 +19,6 @@ private:
 	std::list<std::string> *_members;
 	alive_member *_am;
 	loggerThread* _logger;
-	// std::vector<network_client*> _nw;
 	network_udp *_nw;
 };
 #endif

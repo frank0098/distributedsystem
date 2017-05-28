@@ -4,17 +4,24 @@ CFLAGS=-c -Wall -std=c++11
 
 OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o
 
+REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o 
 .PHONY: all clean
 
-all: failure_detector 
+all: failure_detector remotecontroller
+
+remotecontroller: remotecontroller.o
+	$(CC) $(REMOTECONTROLLER_OBJECTS) -o remotecontroller.out
 
 failure_detector:$(OBJECTS)
 	$(CC) $(OBJECTS) $(DEBUG) -pthread -o failure_detector.out
 
+remotecontroller.o: remotecontroller.cpp network.h
+	$(CC) $(CFLAGS) remotecontroller.cpp
+
 main.o: main.cpp membership.h
 	$(CC) $(CFLAGS) main.cpp
 
-membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h
+membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h thread.h
 	$(CC) $(CFLAGS) membership.cpp
 
 detector.o: detector.cpp detector.h network.h logger.h thread.h member.h

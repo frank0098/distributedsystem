@@ -2,6 +2,22 @@
 #define THREAD_H
 
 #include "pthread.h"
+#include <mutex>
+#include <condition_variable>
+
+class flag_t{
+public:
+    flag_t();
+    void set_true();
+    void set_false();
+    bool is_true();
+private:
+    std::mutex m;
+    std::condition_variable cv;
+    bool _flag;
+};
+extern flag_t stop_flag;
+extern flag_t pause_flag;
 
 class Thread
 {

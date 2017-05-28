@@ -7,11 +7,11 @@
 #include "detector.h"
 #include "logger.h"
 #include "member.h"
+#include "thread.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-
 
 
 
@@ -27,7 +27,7 @@ private:
 	detector* _dt;
 	dissemination* _ds;
 	loggerThread* _logger;
-	std::list<string> _members;
+	std::list<std::string> _members;
 	alive_member* _am;
 };
 #endif
