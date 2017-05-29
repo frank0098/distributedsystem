@@ -24,7 +24,7 @@ std::vector<std::string> alive_member::get_alive_member(){
 
 std::vector<std::string> alive_member::ramdom_select_K(size_t K){
 	std::lock_guard<std::mutex> guard(mutex);
-	std::vector<std::string> reservoir(_am.size());
+	std::vector<std::string> reservoir(K);
 	if(K>=_am.size()) return _am;
 	srand(time(NULL));
 	size_t i=0;
