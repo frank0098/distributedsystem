@@ -45,8 +45,8 @@ void* server::run(){
 		}
 		else if(msg_type==msg_t::EXIT){
 			response_type=msg_t::ACK;
-			_lg->add_write_log_task("SERVER: Remove "+string(source)+" From membership list.");
-			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+			_lg->add_write_log_task("Server: Remove "+string(source)+" From membership list.");
+			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			_am->remove(string(source));
 		}
 		else if(msg_type==msg_t::PING){
