@@ -53,14 +53,16 @@ void* server::run(){
 			response_type=msg_t::ACK;
 		}
 		else if(msg_type==msg_t::INDIRECT_PING){
+			_lg->add_write_log_task("SERVER: receive INDIRECT_PING");
+			// char indirect_ip[INET6_ADDRSTRLEN];
+			// _nw->recv_msg(indirect_ip,INET6_ADDRSTRLEN,source);
+			// msg_t indirect_response=network_udp::send_msg(response_type,DETECTORPORT,source);
+
 			response_type=msg_t::INDIRECT_ACK;
 		}
-		else if(msg_type==msg_t::INDIRECT_ACK){
-
-
-			response_type=msg_t::ACK;
-
-		}
+		// else if(msg_type==msg_t::INDIRECT_ACK){
+		// 	response_type=msg_t::ACK;
+		// }
 		else if(msg_type==msg_t::FAIL){
 			response_type=msg_t::ACK;
 			network_udp::send_msg(response_type,DETECTORPORT,source);
