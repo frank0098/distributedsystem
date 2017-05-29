@@ -13,7 +13,7 @@
 
 class alive_member{
 public:
-	void add(std::string ip);
+	bool add(std::string ip);
 	void remove(std::string ip);
 	std::vector<std::string> ramdom_select_K(size_t K);
 	std::vector<std::string> get_alive_member();

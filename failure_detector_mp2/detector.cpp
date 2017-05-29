@@ -27,14 +27,19 @@ void* detector::run(){
 		msg_t msgtype = _nw->recv_msg(source);
 		// cout<<"detector recv "<<msgtype<<endl;
 		if(msgtype==msg_t::ACK){
-			_am->add(m);
-			_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
-			string cm=_am->get_alive_member_list();
-			_logger->add_write_log_task("Detector: current members: "+cm);
+
+			if(_am->add(m)){
+				_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
+				_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+			}
+			else{
+				_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
+			}
+
 			
 		}   
 		else{
-			_logger->add_write_log_task("Detector: === FATAL ERROR === recv unknown msg from "+m);
+			_logger->add_write_log_task("Detector: === JOIN ERROR ===  recv msg from "+m);
 		}
 		source[0]='\0';
 	}

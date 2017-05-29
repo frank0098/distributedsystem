@@ -35,7 +35,13 @@ void* server::run(){
 				// _nw->disconnect();
 		if(msg_type==msg_t::JOIN){
 			response_type=msg_t::ACK;
-			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+			if(_am->add(string(source))){
+				_lg->add_write_log_task("Server: receive JOIN, Add "+string(source)+" to membership list");
+				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+			}
+			else{
+				_lg->add_write_log_task("Server: "+string(source)+" already in the membership list");
+			}
 		}
 		else if(msg_type==msg_t::EXIT){
 			response_type=msg_t::ACK;
