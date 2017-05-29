@@ -77,7 +77,7 @@ void* detector::run(){
 			}
 			stop_flag.unlock();
 			pause_flag.lock();
-			while(pause_flag.is_true()){
+			if(pause_flag.is_true()){
 				pause_flag.unlock();
 				break;
 				// pause_flag.cond_wait();
@@ -103,6 +103,7 @@ void* detector::run(){
 					bool failflag=true;
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 					for(auto om:other_machines){
+						_logger->add_write_log_task("Detector: other machines: "+om);
 						network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,om.c_str());
 						
 						msg_t indirectmsgtype = _nw->recv_msg(source);
