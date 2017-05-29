@@ -13,7 +13,7 @@ remotecontroller: remotecontroller.o
 	$(CC) $(REMOTECONTROLLER_OBJECTS) -o remotecontroller.out
 
 failure_detector:$(OBJECTS)
-	$(CC) $(OBJECTS) $(DEBUG) -o -pthread failure_detector.out
+	$(CC) $(OBJECTS) $(DEBUG) -pthread -o failure_detector.out
 
 remotecontroller.o: remotecontroller.cpp network.h
 	$(CC) $(CFLAGS) remotecontroller.cpp
