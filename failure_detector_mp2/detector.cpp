@@ -104,11 +104,12 @@ void* detector::run(){
 					for(auto om:other_machines){
 						network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,om.c_str());
 						network_udp::send_msg(om.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
-						
+
+					}
+					for(auto om:other_machines){
 						msg_t indirectmsgtype = _nw->recv_msg(source);
-						int rcv=(int)(indirectmsgtype);
-						_logger->add_write_log_task("Detector: from other machines" + om+string(source)+" "+to_string(rcv));
-						if(indirectmsgtype==msg_t::INDIRECT_ACK){
+						_logger->add_write_log_task("Detector: from other machines" + om+string(source)+" "+to_string(indirectmsgtype));
+						if(string(source)==om && indirectmsgtype==msg_t::INDIRECT_ACK){
 							failflag=false;
 							break;
 						}
