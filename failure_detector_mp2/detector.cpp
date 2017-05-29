@@ -87,7 +87,6 @@ void* detector::run(){
 			source[0]='\0';
 			std::vector<string> alivemembers=_am->get_alive_member();
 			_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
-			// cout<<alivemembers.size()<<endl;
 			for(auto m:alivemembers){
 
 				network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());

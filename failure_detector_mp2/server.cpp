@@ -73,7 +73,7 @@ void* server::run(){
 			char tmp_ip_addr[INET6_ADDRSTRLEN];
 			_nw->recv_msg(tmp_ip_addr,INET6_ADDRSTRLEN,source);
 			_am->remove(string(tmp_ip_addr));
-			_lg->add_write_log_task("SERVER: Receive FAIL: Remove "+string(tmp_ip_addr)+" From membership list.");
+			_lg->add_write_log_task("SERVER: Receive FAIL from "+ string(source)+": Remove "+string(tmp_ip_addr)+" From membership list.");
 			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 			
 

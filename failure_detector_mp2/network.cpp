@@ -103,6 +103,7 @@ bool network_udp::send_msg(const char* msg,size_t msg_size,const char* port,cons
 }
 
 void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
+	ip_addr[0]='\0';
 	int numbytes;
 	struct sockaddr_storage their_addr;
 	socklen_t addr_len;
@@ -130,6 +131,7 @@ void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
 }
 
 msg_t network_udp::recv_msg(char* ip_addr){
+	ip_addr[0]='\0';
 	int numbytes;
 	struct sockaddr_storage their_addr;
 	socklen_t addr_len;
