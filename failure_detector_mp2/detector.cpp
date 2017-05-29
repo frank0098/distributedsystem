@@ -116,8 +116,8 @@ void* detector::run(){
 					}
 					if(failflag){
 						_am->remove(m);
-						_lg->add_write_log_task("Detector: remove "+m+" from membership list");
-						_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+						_logger->add_write_log_task("Detector: remove "+m+" from membership list");
+						_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 						for(auto om:alivemembers){
 							if(om!=m){
 								network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
