@@ -66,11 +66,7 @@ void* detector::run(){
 		_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 		// cout<<alivemembers.size()<<endl;
 		for(auto m:alivemembers){
-			// if(network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str()))
-			{
-				// _logger->add_write_log_task("FAIL TO CONNECT "+m);
-				// continue;
-			}
+
 			network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
 			
 			#if DEBUG
