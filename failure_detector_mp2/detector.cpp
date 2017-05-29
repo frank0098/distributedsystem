@@ -16,6 +16,8 @@ void* detector::run(){
 	// JOIN
 	// For all possible address send JOIN (including itself)
 	// if recv ACK then add that into memberlist
+
+	char source[INET6_ADDRSTRLEN];
 	while(true){
 
 		stop_flag.lock();
@@ -32,7 +34,6 @@ void* detector::run(){
 
 
 		cout<<"start running"<<endl;
-		char source[INET6_ADDRSTRLEN];
 		for(auto m:*_members){
 			if(!network_udp::send_msg(msg_t::JOIN,SERVERPORT,m.c_str())){
 				_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
@@ -137,5 +138,6 @@ void* detector::run(){
 		network_udp::send_msg(msg_t::EXIT,SERVERPORT,m.c_str());
 		_nw->recv_msg(source);
 	}
+	return nullptr;
 
 }
