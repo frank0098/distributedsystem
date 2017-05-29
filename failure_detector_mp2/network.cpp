@@ -106,7 +106,7 @@ void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
 	int numbytes;
 	struct sockaddr_storage their_addr;
 	socklen_t addr_len;
-	msg_t msgtype=msg_t::UNKNOWN;
+	// msg_t msgtype=msg_t::UNKNOWN;
 	addr_len = sizeof their_addr;
 	if ((numbytes = recvfrom(_sockfd, msg, msg_size , 0,
 		(struct sockaddr *)&their_addr, &addr_len)) == -1) {

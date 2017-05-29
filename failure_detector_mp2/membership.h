@@ -3,7 +3,6 @@
 
 
 #include "server.h"
-#include "dissemination.h"
 #include "detector.h"
 #include "logger.h"
 #include "member.h"
@@ -27,7 +26,6 @@ private:
 	server* _sv;
 	service* _sc;
 	detector* _dt;
-	dissemination* _ds;
 	loggerThread* _logger;
 	std::list<std::string> _members;
 	alive_member* _am;

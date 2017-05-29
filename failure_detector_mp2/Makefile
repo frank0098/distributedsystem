@@ -2,7 +2,7 @@ CC=g++
 
 CFLAGS=-c -Wall -std=c++11
 
-OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o service.o workQueue.o
+OBJECTS= main.o membership.o server.o detector.o network.o logger.o thread.o member.o service.o workQueue.o
 
 REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o 
 .PHONY: all clean
@@ -21,14 +21,11 @@ remotecontroller.o: remotecontroller.cpp network.h
 main.o: main.cpp membership.h
 	$(CC) $(CFLAGS) main.cpp
 
-membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h thread.h service.h workQueue.h
+membership.o: membership.cpp membership.h server.h detector.h network.h logger.h thread.h member.h thread.h service.h workQueue.h
 	$(CC) $(CFLAGS) membership.cpp
 
 detector.o: detector.cpp detector.h network.h logger.h thread.h member.h
 	$(CC) $(CFLAGS) $(DEBUG) detector.cpp
-
-dissemination.o: dissemination.cpp dissemination.h network.h logger.h
-	$(CC) $(CFLAGS) dissemination.cpp
 
 server.o: server.cpp server.h network.h logger.h thread.h member.h
 	$(CC) $(CFLAGS) $(DEBUG) server.cpp

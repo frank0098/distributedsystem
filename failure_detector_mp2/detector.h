@@ -12,7 +12,7 @@
 class detector:public Thread{
 public:
 	detector(std::list<string> *mem, alive_member *am, loggerThread *lg);
-	~detector();
+	virtual ~detector();
 	void* run();
 private:
 

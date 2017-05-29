@@ -31,7 +31,6 @@ membership::membership(){
 	_sv=new server(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 
-	// _ds=new dissemination(this->_logger);
 }
 
 void membership::start(){
@@ -48,7 +47,6 @@ void membership::start(){
 		stop_flag.unlock();
 		
 	}
-	cout<<"?ASdfasdfas"<<endl;
 }
 
 membership::~membership(){

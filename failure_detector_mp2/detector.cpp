@@ -88,7 +88,7 @@ void* detector::run(){
 					network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,om.c_str());
 					
 					msg_t indirectmsgtype = _nw->recv_msg(source);
-					if(msgtype==msg_t::INDIRECT_ACK){
+					if(indirectmsgtype==msg_t::INDIRECT_ACK){
 						failflag=false;
 						break;
 					}

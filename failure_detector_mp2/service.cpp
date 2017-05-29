@@ -57,4 +57,5 @@ void* service::run(){
 		}
 		network_udp::send_msg(ret_msgtype,SERVICEPORT,source);
 	}
+	return nullptr;
 }
