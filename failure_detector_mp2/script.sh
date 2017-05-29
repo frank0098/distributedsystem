@@ -17,7 +17,9 @@ declare -a SERVER_LIST=(35.185.91.83
 # ssh -i ~/.ssh/googlekey ysong71illinois@35.185.51.148
 # git config credential.helper 'cache --timeout=360000000'
 cd ~/Desktop/distributedsystem/
-git add .;git commit -m $current_date_time;git push origin master;
+git add .;
+git commit -m $current_date_time;
+git push origin master;
 
 for IP in "${SERVER_LIST[@]}"
 do
