@@ -3,8 +3,10 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
-// #include "thread.h"
+#include "thread.h"
 #include "membership.h"
+#include "pthread.h"
+
 // class MyThread : public Thread
 // {
 //   public:

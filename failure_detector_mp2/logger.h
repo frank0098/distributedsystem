@@ -14,6 +14,7 @@ public:
 	~loggerThread();
 	void* run();
 	void add_write_log_task(std::string params);
+	void end_loggerThread();
 
 private:
 	void write_log(std::string content);

@@ -2,7 +2,7 @@ CC=g++
 
 CFLAGS=-c -Wall -std=c++11
 
-OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o
+OBJECTS= main.o membership.o server.o dissemination.o detector.o network.o logger.o thread.o member.o service.o workQueue.o
 
 REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o 
 .PHONY: all clean
@@ -13,7 +13,7 @@ remotecontroller: remotecontroller.o
 	$(CC) $(REMOTECONTROLLER_OBJECTS) -o remotecontroller.out
 
 failure_detector:$(OBJECTS)
-	$(CC) $(OBJECTS) $(DEBUG) -pthread -o failure_detector.out
+	$(CC) $(OBJECTS) $(DEBUG) -o failure_detector.out
 
 remotecontroller.o: remotecontroller.cpp network.h
 	$(CC) $(CFLAGS) remotecontroller.cpp
@@ -21,7 +21,7 @@ remotecontroller.o: remotecontroller.cpp network.h
 main.o: main.cpp membership.h
 	$(CC) $(CFLAGS) main.cpp
 
-membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h thread.h
+membership.o: membership.cpp membership.h server.h dissemination.h detector.h network.h logger.h thread.h member.h thread.h service.h workQueue.h
 	$(CC) $(CFLAGS) membership.cpp
 
 detector.o: detector.cpp detector.h network.h logger.h thread.h member.h
@@ -33,11 +33,17 @@ dissemination.o: dissemination.cpp dissemination.h network.h logger.h
 server.o: server.cpp server.h network.h logger.h thread.h member.h
 	$(CC) $(CFLAGS) $(DEBUG) server.cpp
 
+service.o: service.cpp network.h logger.h thread.h
+	$(CC) $(CFLAGS) service.cpp
+
 network.o: network.cpp network.h
 	$(CC) $(CFLAGS) network.cpp
 
 logger.o: logger.cpp logger.h workQueue.h
 	$(CC) $(CFLAGS) logger.cpp
+
+workQueue.o: workQueue.cpp workQueue.h thread.h
+	$(CC) $(CFLAGS) workQueue.cpp
 
 thread.o: thread.cpp thread.h
 	$(CC) $(CFLAGS) -pthread thread.cpp

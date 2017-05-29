@@ -20,22 +20,27 @@ loggerThread::loggerThread(std::string path):_log_path(path),_wq(new wqueue<Work
 }
 loggerThread::~loggerThread(){
 	_up=false;
-	loggerThread::run();
+	ofstream f;
+	f.open(_log_path, std::ios_base::app);
+	f<<"["<<currentDateTime()<<"]"<<"====Logger Ends===="<<endl;
+	f.close();
 }
 void* loggerThread::run(){
-	while(!pause_flag.is_true()){
-		cout<<"run"<<endl;
+	while(true){
+		stop_flag.lock();
+		if(stop_flag.is_true() && _wq->size()==0){
+			stop_flag.unlock();
+			break;
+		}
+		stop_flag.unlock();
 		WorkItem* item=(WorkItem*)(_wq->remove());
 		loggerThread::write_log(item->m_message);
 		delete item;
-		// cout<<"run finished"<<endl;
 	}
 }
 
-void loggerThread::add_write_log_task(string params){
+void loggerThread::add_write_log_task(string log_content){
 	if(_up){
-		string log_content=params;
-
 		WorkItem *item=new WorkItem(log_content.c_str(),0);
 		_wq->add(item);	
 	}
@@ -47,4 +52,8 @@ void loggerThread::write_log(std::string content){
   	outfile<<"["<<currentDateTime()<<"] " << content<<endl;
   	// std::cout<<content<<endl;
   	outfile.close();
+}
+
+void loggerThread::end_loggerThread(){
+	_wq->end();
 }

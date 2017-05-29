@@ -8,6 +8,7 @@ detector::detector(std::list<string> *mem, alive_member *am,loggerThread *lg):_m
 detector::~detector(){
 	_nw->disconnect();
 	delete _nw;
+	// _logger->add_write_log_task("detector ends");
 	cout<<"END DETECTOR"<<endl;
 }	
 void* detector::run(){
@@ -48,7 +49,19 @@ void* detector::run(){
 			// else
 			// mark it failure. dissemination to ALL
 
-	while(!pause_flag.is_true()){
+	while(true){
+		stop_flag.lock();
+		if(stop_flag.is_true()){
+			stop_flag.unlock();
+			break;
+		}
+		stop_flag.unlock();
+		pause_flag.lock();
+		while(pause_flag.is_true()){
+			pause_flag.cond_wait();
+		}
+		pause_flag.unlock();
+
 		source[0]='\0';
 		std::vector<string> alivemembers=_am->get_alive_member();
 		// cout<<alivemembers.size()<<endl;

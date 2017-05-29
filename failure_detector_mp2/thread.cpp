@@ -58,19 +58,33 @@ pthread_t Thread::self() {
 
 
 flag_t::flag_t():_flag(false){
-
+    pthread_mutex_init(&m, NULL);
+    pthread_cond_init(&cv, NULL);
+}
+flag_t::~flag_t(){
+    pthread_mutex_destroy(&m);
+    pthread_cond_destroy(&cv);
+}
+void flag_t::lock(){
+    pthread_mutex_lock(&m); 
+}
+void flag_t::unlock(){
+    pthread_mutex_unlock(&m);
 }
 void flag_t::set_true(){
-    std::lock_guard<std::mutex> guard(m);
     _flag=true;
 }
 void flag_t::set_false(){
-    std::lock_guard<std::mutex> guard(m);
     _flag=false;
 }
 bool flag_t::is_true(){
-    std::lock_guard<std::mutex> guard(m);
     return _flag;
+}
+void flag_t::cond_signal(){
+    pthread_cond_signal(&cv); 
+}
+void flag_t::cond_wait(){
+    pthread_cond_wait(&cv,&m); 
 }
 
 

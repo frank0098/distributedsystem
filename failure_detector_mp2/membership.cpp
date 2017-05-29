@@ -24,23 +24,28 @@ membership::membership(){
 	const char *homedir = pw->pw_dir;
 	strcpy(buf,homedir);
 	strcat(buf,"/log");
+	server_addr_read_config("server.cfg",_members);
 	_logger=new loggerThread(buf);
+	_sc=new service(this->_logger);
 	_am=new alive_member();
 	_sv=new server(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 
 	// _ds=new dissemination(this->_logger);
-	server_addr_read_config("server.cfg",_members);
 }
 
 void membership::start(){
+	_sc->start();
 	_sv->start();
 	_logger->start();
 	_dt->start();
-	stop_flag.set_true();
-	pause_flag.set_true();
-
-	while(!stop_flag.is_true()){
+	while(true){
+		stop_flag.lock();
+		if(stop_flag.is_true()){
+			stop_flag.unlock();
+			break;
+		}
+		stop_flag.unlock();
 		
 	}
 	cout<<"?ASdfasdfas"<<endl;
@@ -51,9 +56,11 @@ membership::~membership(){
 	_sv->join();
 	_logger->join();
 	_dt->join();
+	_sc->join();
+	cout<<"join finished"<<endl;
+	delete _sc;
 	delete _sv;
 	delete _logger;
 	delete _am;
-	// delete _ds;
 	delete _dt;
 }

@@ -8,6 +8,7 @@
 #include "logger.h"
 #include "member.h"
 #include "thread.h"
+#include "service.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -24,6 +25,7 @@ public:
 	void start();
 private:
 	server* _sv;
+	service* _sc;
 	detector* _dt;
 	dissemination* _ds;
 	loggerThread* _logger;

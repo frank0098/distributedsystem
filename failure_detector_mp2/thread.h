@@ -1,23 +1,29 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include "pthread.h"
+#include <pthread.h>
 #include <mutex>
 #include <condition_variable>
 
 class flag_t{
 public:
     flag_t();
+    ~flag_t();
     void set_true();
     void set_false();
     bool is_true();
+    void lock();
+    void unlock();
+    void cond_wait();
+    void cond_signal();
 private:
-    std::mutex m;
-    std::condition_variable cv;
+    pthread_mutex_t m; 
+    pthread_cond_t cv;
     bool _flag;
 };
 extern flag_t stop_flag;
 extern flag_t pause_flag;
+
 
 class Thread
 {

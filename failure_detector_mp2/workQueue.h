@@ -1,7 +1,11 @@
+#ifndef WORKQUEUE_H
+#define WORKQUEUE_H
+
 #include <pthread.h>
 #include <list>
 #include <string>
- 
+#include "thread.h"
+
 using namespace std;
  
 struct WorkItem
@@ -39,20 +43,25 @@ public:
     }
     T remove() {
         pthread_mutex_lock(&m_mutex);
-        while (m_queue.size() == 0 && pause_flag.is_true()) {
+        while (m_queue.size() == 0 && !stop_flag.is_true()) {
             pthread_cond_wait(&m_condv, &m_mutex);
         }
         T item;
-        if(pause_flag.is_true()){
+        if(stop_flag.is_true() && m_queue.size() == 0){
             item= new WorkItem("wqueue stop waiting...quiting...",0);
         }
-        else{
+        else
+        {
             item = m_queue.front();
             m_queue.pop_front();
         }
-        
         pthread_mutex_unlock(&m_mutex);
         return item;
+    }
+    void end() {
+        pthread_mutex_lock(&m_mutex);
+        pthread_cond_signal(&m_condv);
+        pthread_mutex_unlock(&m_mutex);
     }
     int size() {
         pthread_mutex_lock(&m_mutex);
@@ -61,3 +70,5 @@ public:
         return size;
     }
 };
+
+#endif

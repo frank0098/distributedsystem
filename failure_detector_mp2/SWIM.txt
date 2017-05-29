@@ -28,3 +28,57 @@ Detection
 
 Disemination
 	-Multicast membership list
+
+	server detector 
+
+	at beginning
+	pause flag=false;
+	end flag=true
+	while(1){
+		mutex_lock(end_flag_lock);
+		if(end_flag==true)
+			mutex_unlock(end_flag_lock)
+			break
+		mutex_unlock(end_flag)
+
+		mutex_lock(pause_flag_lock)
+		while(puase_flag==true){
+			cond_wait(pause_flag_cv,pause_flag_lock)
+		}
+		mutex_unlock(pause_flag_lock)
+
+		//do things
+	}
+
+	logger:
+	
+
+	//when recv pause signal
+	mutex_lock(pause_flag_lock)
+	pause_flag=true;
+	mutex_unlock(pause_flag_lock)
+
+	when recv restart signal
+	mutex_lock(pause_flag_lock)
+	pause_flag=false;
+	cond_signal(pause_flag_cv)
+	mutex_unlock(pause_flag_lock)
+
+	when recv end signal
+	mutex_lock(end_flag)
+	end_flag=true
+	mutex_unlock(end_flag)
+
+	mutex_lock(pause_flag_lock)
+	pause_flag=false;
+	cond_signal(pause_flag_cv)
+	mutex_unlock(pause_flag_lock)
+
+
+
+
+
+
+
+
+
