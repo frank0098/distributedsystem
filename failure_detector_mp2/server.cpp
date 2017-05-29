@@ -54,11 +54,14 @@ void* server::run(){
 		}
 		else if(msg_type==msg_t::INDIRECT_PING){
 			_lg->add_write_log_task("SERVER: receive INDIRECT_PING");
-			// char indirect_ip[INET6_ADDRSTRLEN];
-			// _nw->recv_msg(indirect_ip,INET6_ADDRSTRLEN,source);
-			// msg_t indirect_response=network_udp::send_msg(response_type,DETECTORPORT,source);
+			char indirect_ip[INET6_ADDRSTRLEN];
+			_nw->recv_msg(indirect_ip,INET6_ADDRSTRLEN,source);
+			network_udp::send_msg(msg_t::PING,SERVERPORT,indirect_ip);
+			msg_t indirect_response=_nw->recv_msg(source);
+			if(indirect_response==msg_t::ACK){
+				response_type=msg_t::INDIRECT_ACK;
+			}
 
-			response_type=msg_t::INDIRECT_ACK;
 		}
 		// else if(msg_type==msg_t::INDIRECT_ACK){
 		// 	response_type=msg_t::ACK;

@@ -104,10 +104,11 @@ void* detector::run(){
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 					for(auto om:other_machines){
 						network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,om.c_str());
+						network_udp::send_msg(om.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
 						
 						msg_t indirectmsgtype = _nw->recv_msg(source);
 						int rcv=(int)(indirectmsgtype);
-						_logger->add_write_log_task("Detector: from other machines" + om+string(source)+to_string(rcv));
+						_logger->add_write_log_task("Detector: from other machines" + om+string(source)+" "+to_string(rcv));
 						if(indirectmsgtype==msg_t::INDIRECT_ACK){
 							failflag=false;
 							break;
