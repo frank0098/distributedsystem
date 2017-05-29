@@ -45,9 +45,10 @@ void* server::run(){
 		}
 		else if(msg_type==msg_t::EXIT){
 			response_type=msg_t::ACK;
-			_lg->add_write_log_task("Server: Remove "+string(source)+" From membership list.");
-			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			_am->remove(string(source));
+			_lg->add_write_log_task("Server: Receive EXIT: Remove "+string(source)+" From membership list.");
+			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+
 		}
 		else if(msg_type==msg_t::PING){
 			response_type=msg_t::ACK;
@@ -68,13 +69,13 @@ void* server::run(){
 		// }
 		else if(msg_type==msg_t::FAIL){
 			response_type=msg_t::ACK;
-			network_udp::send_msg(response_type,DETECTORPORT,source);
+			// network_udp::send_msg(response_type,DETECTORPORT,source);
 			char tmp_ip_addr[INET6_ADDRSTRLEN];
 			_nw->recv_msg(tmp_ip_addr,INET6_ADDRSTRLEN,source);
-
-			_lg->add_write_log_task("SERVER: Remove "+string(tmp_ip_addr)+" From membership list.");
-			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 			_am->remove(string(tmp_ip_addr));
+			_lg->add_write_log_task("SERVER: Receive FAIL: Remove "+string(tmp_ip_addr)+" From membership list.");
+			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+			
 
 		}
 		// cout<<"server send "<<response_type<<endl;

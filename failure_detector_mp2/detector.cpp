@@ -116,14 +116,16 @@ void* detector::run(){
 					}
 					if(failflag){
 						_am->remove(m);
+						_lg->add_write_log_task("Detector: remove "+m+" from membership list");
+						_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 						for(auto om:alivemembers){
 							if(om!=m){
 								network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
-								_nw->recv_msg(source);
-								char tmp[INET6_ADDRSTRLEN];
-								strcpy(tmp,m.c_str());
-								network_udp::send_msg(tmp,INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
-								_nw->recv_msg(source);
+								// _nw->recv_msg(source);
+								// char tmp[INET6_ADDRSTRLEN];
+								// strcpy(tmp,m.c_str());
+								network_udp::send_msg(m.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
+								// _nw->recv_msg(source);
 							}
 						}
 					}
