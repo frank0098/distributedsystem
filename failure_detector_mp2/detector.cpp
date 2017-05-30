@@ -49,7 +49,7 @@ void* detector::run(){
 			// cout<<"detector recv "<<msgtype<<endl;
 			_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
 			msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
-			if(string(source) == m && msg_type==msg_t::JOIN_SUCCESS){
+			if(msg_type==msg_t::JOIN_SUCCESS){
 
 				if(_am->add(m)){
 					_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
