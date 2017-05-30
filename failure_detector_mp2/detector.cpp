@@ -106,7 +106,7 @@ void* detector::run(){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				}
 				_logger->add_write_log_task("Detector: DEBUG: alive member: "+m+" source: "+string(source) + "msg type "+to_string(msg_type));
-				if(string(source)!=m) continue;
+				if(strlen(source)!=0 && string(source)!=m) continue;
 				if(msg_type==msg_t::ACK) continue;
 				// if timeout
 				if(msg_type==msg_t::TIMEOUT){
