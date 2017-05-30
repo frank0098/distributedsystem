@@ -24,7 +24,7 @@ void network_udp::generate_msg(char* msg,msg_t msgtype,const char* ip_addr){
 }
 msg_t network_udp::get_response(char* msg,char* ip_addr){
 	const char *format = "FailureDetector/1.0 \r\nMsg sent is %c \r\nAdditional info %s\r\n\r\n";
-	msg_t msgtype;
+	msg_t msgtype=msg_t::TIMEOUT;
 	sscanf(msg,format,&msgtype,ip_addr);
 	return msgtype;
 }
@@ -115,7 +115,7 @@ bool network_udp::send_msg(const char* msg,size_t msg_size,const char* port,cons
 	return true;
 }
 
-void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
+bool network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
 	msg[0]='\0';
 	ip_addr[0]='\0';
 	int numbytes;
@@ -126,6 +126,7 @@ void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
 	if ((numbytes = recvfrom(_sockfd, msg, msg_size , 0,
 		(struct sockaddr *)&their_addr, &addr_len)) == -1) {
 		perror("recvfrom");
+		return false;
 	}
 
 	switch(their_addr.ss_family) {
@@ -142,6 +143,7 @@ void network_udp::recv_msg(char* msg,size_t msg_size,char* ip_addr){
         default:
             strncpy(ip_addr, "Unknown AF", INET6_ADDRSTRLEN);
     }
+    return true;
 }
 
 msg_t network_udp::recv_msg(char* ip_addr){

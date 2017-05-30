@@ -44,9 +44,10 @@ void* detector::run(){
 				_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
 				continue;
 			}
-
-			_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
-			msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+			msg_t msg_type=msg_t::TIMEOUT;
+			if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
+				msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+			}
 			cout<<(char)msg_type<<endl;
 			if(msg_type==msg_t::JOIN_SUCCESS){
 
@@ -100,9 +101,10 @@ void* detector::run(){
 				#if DEBUG
 				_logger->add_write_log_task("Detector: SEND PING TO "+m);
 				#endif
-
-				_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
-				msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+				msg_t msg_type=msg_t::TIMEOUT;
+				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
+					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+				}
 				_logger->add_write_log_task("Detector: DEBUG: alive member: "+m+" source: "+string(source) + "msg type "+to_string(msg_type));
 				if(string(source)!=m) continue;
 				if(msg_type==msg_t::ACK) continue;
@@ -116,9 +118,10 @@ void* detector::run(){
 
 						network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());
 						network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
-
-						_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
-						msg_t indirectmsgtype=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+						msg_t indirectmsgtype=msg_t::TIMEOUT;
+						if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
+							indirectmsgtype=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+						}
 
 						if(string(source)==om && string(additional_ip_received)==m && indirectmsgtype==msg_t::QUERY_SUCCESS){
 							failflag=false;

@@ -86,7 +86,7 @@ public:
 	void connect();
 	static bool send_msg(msg_t msgtype,const char* port,const char* ip_addr);
 	msg_t recv_msg(char* ip_addr);
-	void recv_msg(char* msg,size_t msg_size,char* ip_addr);
+	bool recv_msg(char* msg,size_t msg_size,char* ip_addr);
 	static bool send_msg(const char* msg,size_t msg_size,const char* port,const char* ip_addr);
 	static void generate_msg(char* msg,msg_t msgtype,const char* ip_addr);
 	static msg_t get_response(char* msg,char* ip_addr);

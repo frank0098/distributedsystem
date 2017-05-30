@@ -29,8 +29,13 @@ void* server::run(){
 		char msg_receive_buffer[BUFFER_SIZE];
 		char additional_ip_received[INET6_ADDRSTRLEN];
 		char msg_send_buffer[BUFFER_SIZE];
-		_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
-		msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+		msg_t msg_type;
+		if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
+			msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+		}
+		else{
+			msg_type=msg_t::TIMEOUT;
+		}
 
 		if(msg_type==msg_t::JOIN){
 			if(_am->add(string(source))){
