@@ -44,11 +44,10 @@ void* detector::run(){
 				_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
 				continue;
 			}
-			// _logger->add_write_log_task("Detector: SEND JOIN TO "+m);
-			// msg_t msgtype = _nw->recv_msg(source);
-			// cout<<"detector recv "<<msgtype<<endl;
+			
 			_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
 			msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+			cout<<(char)msg_type<<endl;
 			if(msg_type==msg_t::JOIN_SUCCESS){
 
 				if(_am->add(m)){
@@ -105,9 +104,11 @@ void* detector::run(){
 				_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
 				msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				if(string(source)!=m) continue;
+				if(msg_type==msg_t::ACK) continue;
 				// if timeout
-				if(msg_type!=msg_t::ACK){
-					_logger->add_write_log_task("Detector: receive " + to_string(msg_type)+" :"+m+" might have FAILED.SEND QUERY");
+				if(msg_type==msg_t::TIMEOUT){
+
+					_logger->add_write_log_task("Detector: receive " + to_string((char)(msg_type))+" :"+m+" might have FAILED.SEND QUERY");
 					bool failflag=true;
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 					for(auto om:other_machines){
@@ -131,12 +132,6 @@ void* detector::run(){
 							if(om!=m){
 								network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,m.c_str());
 								network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
-								// network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
-								// _nw->recv_msg(source);
-								// char tmp[INET6_ADDRSTRLEN];
-								// strcpy(tmp,m.c_str());
-								// network_udp::send_msg(m.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
-								// _nw->recv_msg(source);
 							}
 						}
 					}
