@@ -27,6 +27,7 @@
 
 
 enum msg_t {
+	TIMEOUT=-1,
 	UNKNOWN=0,
 	JOIN=1,
 	EXIT=2,

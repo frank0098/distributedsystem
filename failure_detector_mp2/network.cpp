@@ -135,7 +135,7 @@ msg_t network_udp::recv_msg(char* ip_addr){
 	int numbytes;
 	struct sockaddr_storage their_addr;
 	socklen_t addr_len;
-	msg_t msgtype=msg_t::UNKNOWN;
+	msg_t msgtype=msg_t::TIMEOUT;
 	addr_len = sizeof their_addr;
 	if ((numbytes = recvfrom(_sockfd, &msgtype, sizeof(msg_t) , 0,
 		(struct sockaddr *)&their_addr, &addr_len)) == -1) {
@@ -360,7 +360,7 @@ msg_t network_client::recv_msg(){
 	msg_t msgtype;
 	if(recv(_sockfd,&msgtype,sizeof (msg_t),0)<=0){
 		perror("receive type fail");
-		return msg_t::UNKNOWN;
+		return msg_t::TIMEOUT;
 	}
 	return msgtype;
 }
@@ -369,7 +369,7 @@ msg_t network_server::recv_msg(int nwesockfd){
 	msg_t msgtype;
 	if(recv(nwesockfd,&msgtype,sizeof (msg_t),0)<=0){
 		perror("receive type fail");
-		return msg_t::UNKNOWN;
+		return msg_t::TIMEOUT;
 	}
 	return msgtype;
 }

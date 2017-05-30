@@ -98,7 +98,7 @@ void* detector::run(){
 				msg_t msgtype=_nw->recv_msg(source);
 				// if timeout
 				if(msgtype!=msg_t::ACK){
-					_logger->add_write_log_task("Detector: receive " + to_string(msgtype)+" :"+m+" might have FAILED.SEND INDIRECT_PING");
+					_logger->add_write_log_task("Detector: receive " + to_string(msgtype)+" :"+m+" might have FAILED.SEND QUERY");
 					bool failflag=true;
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 					for(auto om:other_machines){
