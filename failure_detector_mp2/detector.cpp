@@ -8,8 +8,8 @@ detector::detector(std::list<string> *mem, alive_member *am,loggerThread *lg):_m
 detector::~detector(){
 	_nw->disconnect();
 	delete _nw;
-	// _logger->add_write_log_task("detector ends");
-	cout<<"END DETECTOR"<<endl;
+	_logger->add_write_log_task("detector ends");
+	// cout<<"END DETECTOR"<<endl;
 }	
 void* detector::run(){
 
@@ -18,6 +18,9 @@ void* detector::run(){
 	// if recv ACK then add that into memberlist
 
 	char source[INET6_ADDRSTRLEN];
+	char msg_receive_buffer[BUFFER_SIZE];
+	char additional_ip_received[INET6_ADDRSTRLEN];
+	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
 
 		stop_flag.lock();
@@ -33,16 +36,20 @@ void* detector::run(){
 		pause_flag.unlock();
 
 
+
 		cout<<"start running"<<endl;
 		for(auto m:*_members){
-			if(!network_udp::send_msg(msg_t::JOIN,SERVERPORT,m.c_str())){
+			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN,m.c_str());
+			if(!network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,m.c_str())){
 				_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
 				continue;
 			}
 			// _logger->add_write_log_task("Detector: SEND JOIN TO "+m);
-			msg_t msgtype = _nw->recv_msg(source);
+			// msg_t msgtype = _nw->recv_msg(source);
 			// cout<<"detector recv "<<msgtype<<endl;
-			if(msgtype==msg_t::ACK){
+			_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
+			msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+			if(string(source) == m && msg_type==msg_t::JOIN_SUCCESS){
 
 				if(_am->add(m)){
 					_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
@@ -51,8 +58,6 @@ void* detector::run(){
 				else{
 					_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 				}
-
-				
 			}   
 			else{
 				_logger->add_write_log_task("Detector: === JOIN ERROR ===  recv msg from "+m);
@@ -89,27 +94,31 @@ void* detector::run(){
 			_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 			for(auto m:alivemembers){
 
-				network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
+				network_udp::generate_msg(msg_send_buffer,msg_t::PING,m.c_str());
+				network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,m.c_str());
+				// network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
 				
 				#if DEBUG
 				_logger->add_write_log_task("Detector: SEND PING TO "+m);
 				#endif
 
-				msg_t msgtype=_nw->recv_msg(source);
+				_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
+				msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+				if(string(source)!=m) continue;
 				// if timeout
-				if(msgtype!=msg_t::ACK){
-					_logger->add_write_log_task("Detector: receive " + to_string(msgtype)+" :"+m+" might have FAILED.SEND QUERY");
+				if(msg_type!=msg_t::ACK){
+					_logger->add_write_log_task("Detector: receive " + to_string(msg_type)+" :"+m+" might have FAILED.SEND QUERY");
 					bool failflag=true;
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
 					for(auto om:other_machines){
-						network_udp::send_msg(msg_t::QUERY,SERVERPORT,om.c_str());
-						network_udp::send_msg(om.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
 
-					}
-					for(auto om:other_machines){
-						msg_t indirectmsgtype = _nw->recv_msg(source);
-						_logger->add_write_log_task("Detector: from other machines" +string(source)+" "+to_string(indirectmsgtype));
-						if(indirectmsgtype==msg_t::QUERY_SUCCESS){
+						network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());
+						network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
+
+						_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
+						msg_t indirectmsgtype=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+
+						if(string(source)==om && string(additional_ip_received)==m && indirectmsgtype==msg_t::QUERY_SUCCESS){
 							failflag=false;
 							break;
 						}
@@ -120,11 +129,13 @@ void* detector::run(){
 						_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 						for(auto om:alivemembers){
 							if(om!=m){
-								network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
+								network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,m.c_str());
+								network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
+								// network_udp::send_msg(msg_t::FAIL,SERVERPORT,om.c_str());
 								// _nw->recv_msg(source);
 								// char tmp[INET6_ADDRSTRLEN];
 								// strcpy(tmp,m.c_str());
-								network_udp::send_msg(m.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
+								// network_udp::send_msg(m.c_str(),INET6_ADDRSTRLEN,SERVERPORT,om.c_str());
 								// _nw->recv_msg(source);
 							}
 						}
@@ -140,8 +151,8 @@ void* detector::run(){
 	// Send EXIT to all processes
 	for(auto m:_am->get_alive_member()){
 		source[0]='\0';
-		network_udp::send_msg(msg_t::EXIT,SERVERPORT,m.c_str());
-		_nw->recv_msg(source);
+		network_udp::generate_msg(msg_send_buffer,msg_t::EXIT,m.c_str());
+		network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,m.c_str());
 	}
 	return nullptr;
 

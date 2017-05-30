@@ -27,26 +27,28 @@
 
 
 enum msg_t {
-	TIMEOUT=-1,
-	UNKNOWN=0,
-	JOIN=1,
-	EXIT=2,
-	PING=3,
-	ACK=4,
-	INDIRECT_PING=5,
-	INDIRECT_ACK=6,
-	QUERY=7,
-	QUERY_SUCCESS=8,
-	FAIL=9,
-	CONTROLLER_RESTART_REMOTELY=10,
-	CONTROLLER_PAUSE_REMOTELY=11,
-	CONTROLLER_END_REMOTELY=12
+	TIMEOUT='a',
+	UNKNOWN='b',
+	JOIN='c',
+	EXIT='d',
+	PING='e',
+	ACK='f',
+	INDIRECT_PING='g',
+	INDIRECT_ACK='h',
+	QUERY='i',
+	QUERY_SUCCESS='j',
+	FAIL='k',
+	CONTROLLER_RESTART_REMOTELY='l',
+	CONTROLLER_PAUSE_REMOTELY='m',
+	CONTROLLER_END_REMOTELY='n',
+	JOIN_SUCCESS='o'
 };
 #define PORT "5000"
 #define SERVERPORT "5001"
 #define DETECTORPORT "5002"
 #define SERVICEPORT "5003"
 #define BACKLOG 10
+#define BUFFER_SIZE 200
 
 class network{
 public:
@@ -86,6 +88,8 @@ public:
 	msg_t recv_msg(char* ip_addr);
 	void recv_msg(char* msg,size_t msg_size,char* ip_addr);
 	static bool send_msg(const char* msg,size_t msg_size,const char* port,const char* ip_addr);
+	static void generate_msg(char* msg,msg_t msgtype,const char* ip_addr);
+	static msg_t get_response(char* msg,char* ip_addr);
 private:
 	const char* _PORT;
 	bool _settimeout;

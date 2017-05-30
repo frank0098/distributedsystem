@@ -7,8 +7,7 @@ server::server(loggerThread* lg,alive_member* am):_lg(lg),_am(am){
 server::~server(){
 	_nw->disconnect();
 	delete _nw;
-	cout<<"server ends"<<endl;
-	// _lg->add_write_log_task("server ends");
+	_lg->add_write_log_task("server ends");
 }
 void* server::run(){
 
@@ -27,14 +26,13 @@ void* server::run(){
 		pause_flag.unlock();
 
 		char source[INET6_ADDRSTRLEN];
-		msg_t msg_type=_nw->recv_msg(source);
-		// _lg->add_write_log_task("SERVER:  recv msg from "+string(source));
-		// cout<<"server recv msg_type "<<msg_type<<endl;
-		msg_t response_type=msg_t::UNKNOWN;
-		// if(!fork())
-				// _nw->disconnect();
+		char msg_receive_buffer[BUFFER_SIZE];
+		char additional_ip_received[INET6_ADDRSTRLEN];
+		char msg_send_buffer[BUFFER_SIZE];
+		_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source);
+		msg_t msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+
 		if(msg_type==msg_t::JOIN){
-			response_type=msg_t::ACK;
 			if(_am->add(string(source))){
 				_lg->add_write_log_task("Server: receive JOIN, Add "+string(source)+" to membership list");
 				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
@@ -42,48 +40,48 @@ void* server::run(){
 			else{
 				_lg->add_write_log_task("Server: "+string(source)+" already in the membership list");
 			}
+			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
 		}
 		else if(msg_type==msg_t::EXIT){
-			response_type=msg_t::ACK;
 			_am->remove(string(source));
 			_lg->add_write_log_task("Server: Receive EXIT: Remove "+string(source)+" From membership list.");
 			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
 
 		}
 		else if(msg_type==msg_t::PING){
-			response_type=msg_t::ACK;
+			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
 		}
 		else if(msg_type==msg_t::QUERY){
-			
-			char indirect_ip[INET6_ADDRSTRLEN];
-			_nw->recv_msg(indirect_ip,INET6_ADDRSTRLEN,source);
-			_lg->add_write_log_task("SERVER: receive QUERY from "+string(source)+" to ping "+indirect_ip);
-			network_udp::send_msg(msg_t::INDIRECT_PING,SERVERPORT,indirect_ip);
-			msg_t indirect_response=_nw->recv_msg(source);
-			if(indirect_response==msg_t::INDIRECT_ACK){
-				response_type=msg_t::QUERY_SUCCESS;
-			}
-
+			_lg->add_write_log_task("SERVER: receive QUERY from "+string(source)+" to ping "+additional_ip_received);
+			network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_PING,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,additional_ip_received);
 		}
 		else if(msg_type==msg_t::INDIRECT_PING){
-			response_type=msg_t::INDIRECT_ACK;
+			network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_ACK,additional_ip_received);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,source);
+		}
+		else if(msg_type==msg_t::INDIRECT_ACK){
+
+			network_udp::generate_msg(msg_send_buffer,msg_t::QUERY_SUCCESS,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,additional_ip_received);
 		}
 		else if(msg_type==msg_t::FAIL){
-			response_type=msg_t::ACK;
-			// network_udp::send_msg(response_type,DETECTORPORT,source);
 			char tmp_ip_addr[INET6_ADDRSTRLEN];
-			_nw->recv_msg(tmp_ip_addr,INET6_ADDRSTRLEN,source);
-			_am->remove(string(tmp_ip_addr));
-			_lg->add_write_log_task("SERVER: Receive FAIL from "+ string(source)+": Remove "+string(tmp_ip_addr)+" From membership list.");
+			_am->remove(string(additional_ip_received));
+			_lg->add_write_log_task("SERVER: Receive FAIL from "+ string(source)+": Remove "+string(additional_ip_received)+" From membership list.");
 			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
-			
-
+			network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);	
 		}
 		// cout<<"server send "<<response_type<<endl;
-		#if DEBUG
-		_lg->add_write_log_task("SERVER:  send ACK to "+string(source));
-		#endif
-		network_udp::send_msg(response_type,DETECTORPORT,source);
+		// #if DEBUG
+		// _lg->add_write_log_task("SERVER:  send ACK to "+string(source));
+		// #endif
+		// network_udp::send_msg(response_type,DETECTORPORT,source);
 			
 	}
 
