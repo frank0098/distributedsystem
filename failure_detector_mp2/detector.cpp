@@ -94,7 +94,7 @@ void* detector::run(){
 			for(auto m:alivemembers){
 
 				network_udp::generate_msg(msg_send_buffer,msg_t::PING,m.c_str());
-				network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,m.c_str());
+				network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,m.c_str());
 				// network_udp::send_msg(msg_t::PING,SERVERPORT,m.c_str());
 				
 				#if DEBUG
