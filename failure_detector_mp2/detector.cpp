@@ -114,6 +114,7 @@ void* detector::run(){
 					_logger->add_write_log_task("Detector: receive " + to_string((char)(msg_type))+" :"+m+" might have FAILED.SEND QUERY");
 					bool failflag=true;
 					std::vector<std::string> other_machines=_am->ramdom_select_K(2);
+					if(other_machines.size()<=2) continue;
 					for(auto om:other_machines){
 
 						network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());
