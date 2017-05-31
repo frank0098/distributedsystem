@@ -57,7 +57,7 @@ void* server::run(){
 
 		}
 		else if(msg_type==msg_t::PING){
-			if(_am->exists(string(source))){
+			if(!_am->exists(string(source))){
 				_am->add(string(source));
 				_lg->add_write_log_task("Server: REJOIN Add "+string(source)+" to membership list");
 				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
