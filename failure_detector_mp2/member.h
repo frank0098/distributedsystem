@@ -18,6 +18,7 @@ public:
 	std::vector<std::string> ramdom_select_K(size_t K);
 	std::vector<std::string> get_alive_member();
 	std::string get_alive_member_list();
+	bool exists(std::string ip);
 
 private:
 	std::vector<std::string> _am;

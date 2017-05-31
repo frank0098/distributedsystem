@@ -17,6 +17,12 @@ void alive_member::remove(std::string ip){
 	    _am.erase(it);
 }
 
+bool alive_member::exists(std::string ip){
+	std::lock_guard<std::mutex> guard(mutex);
+	auto it=std::find(_am.begin(),_am.end(),ip);
+	return it!=_am.end();
+}
+
 std::vector<std::string> alive_member::get_alive_member(){
 	std::lock_guard<std::mutex> guard(mutex);
 	return _am;
