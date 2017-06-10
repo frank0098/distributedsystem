@@ -27,7 +27,7 @@ do
 	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'sudo reboot'"
 	
 	sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "pid=\$(ps aux | grep 'failure_detector.out' | awk '{print \$2}' | head -1); echo \$pid |xargs kill"
-	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem;git reset --hard; git pull; cd ~/distributedsystem/failure_detector_mp2;make clean; make; nohup ./failure_detector.out > /dev/null 2>&1 &'"
+	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem;git reset --hard; git pull; cd ~/distributedsystem/failure_detector_mp2;make; nohup ./failure_detector.out > /dev/null 2>&1 &'"
 	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "sh -c 'cd ~/distributedsystem; cd ~/distributedsystem/failure_detector_mp2;nohup ./failure_detector.out > /dev/null 2>&1 &'"
 	# sshpass -p password ssh -i ~/.ssh/googlekey ysong71illinois@$IP "cd distributedsystem/logger_mp1  && git pull && make && nohup ./server.out&"
 
