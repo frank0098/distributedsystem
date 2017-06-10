@@ -60,6 +60,7 @@ void* detector::run(){
 				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				}
+				_logger->add_write_log_task("Detector: Recv msgtype "+to_string(msg_type)+" from "+string(source));
 				if(msg_type==msg_t::JOIN_SUCCESS){
 					if(_am->add(string(source))){
 							_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
@@ -68,7 +69,6 @@ void* detector::run(){
 					else{
 						_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 					}
-					cout<<source<<endl;
 					ds=detector_state::PING_ACK_PHASE;
 				}   
 
