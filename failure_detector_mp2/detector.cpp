@@ -48,6 +48,7 @@ void* detector::run(){
 			detector_stop_flag.cond_wait();
 		}
 		detector_stop_flag.unlock();
+
 		_logger->add_write_log_task("running : nvm ");
 		msg_t msg_type=msg_t::TIMEOUT;
 		source[0]='\0';
@@ -116,6 +117,9 @@ void* detector::run(){
 			}
 			ds=detector_state::PING_ACK_PHASE;
 		}
+		detector_sender_stop_flag.lock();
+		detector_sender_stop_flag.set_false();
+		detector_sender_stop_flag.unlock();
 		detector_stop_flag.lock();
 		detector_stop_flag.set_true();
 		detector_stop_flag.unlock();

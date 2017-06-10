@@ -69,7 +69,7 @@ void* detector_sender::run(){
 			}
 		}
 		detector_sender_stop_flag.lock();
-		detector_stop_flag.set_true();
+		detector_sender_stop_flag.set_true();
 		detector_sender_stop_flag.unlock();	
 
 		while(detector_sender_stop_flag.is_true()){
