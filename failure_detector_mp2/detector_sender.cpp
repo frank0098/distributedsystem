@@ -26,6 +26,7 @@ void* detector_sender::run(){
 			break;
 		}
 		stop_flag.unlock();
+		
 		pause_flag.lock();
 		while(pause_flag.is_true()){
 			pause_flag.cond_wait();
@@ -72,9 +73,11 @@ void* detector_sender::run(){
 		detector_sender_stop_flag.set_true();
 		detector_sender_stop_flag.unlock();	
 
+		detector_sender_stop_flag.lock();
 		while(detector_sender_stop_flag.is_true()){
 			detector_sender_stop_flag.cond_wait();
 		}
+		detector_sender_stop_flag.unlock();
 		
 	}
 
