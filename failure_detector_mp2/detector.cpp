@@ -18,7 +18,6 @@ detector::~detector(){
 	// cout<<"END DETECTOR"<<endl;
 }	
 void* detector::run(){
-	_logger->add_write_log_task("running : at least it start once");
 	// JOIN
 	// For all possible address send JOIN (including itself)
 	// if recv ACK then add that into memberlist
@@ -28,7 +27,6 @@ void* detector::run(){
 	char additional_ip_received[INET6_ADDRSTRLEN];
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
-		_logger->add_write_log_task("running : at least it goes into loop");
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();
