@@ -38,7 +38,7 @@ void* detector::run(){
 		pause_flag.lock();
 		while(pause_flag.is_true()){
 			pause_flag.cond_wait();
-			ds=detector_state::START_PHASE;
+			// ds=detector_state::START_PHASE;
 		}
 		pause_flag.unlock();
 
