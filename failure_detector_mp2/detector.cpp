@@ -89,6 +89,9 @@ void* detector::run(){
 					if(it != suspicious_dead_members.end())
 					    suspicious_dead_members.erase(it);
 				}
+				else{
+					_logger->add_write_log_task("Detector: recv msg: "+to_string(msg_type));
+				}
 			}
 			if(suspicious_dead_members.size()!=0){
 				ds=detector_state::SUSPICIOUS;
