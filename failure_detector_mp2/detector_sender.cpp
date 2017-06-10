@@ -40,6 +40,7 @@ void* detector_sender::run(){
 		
 		detector_stop_flag.lock();
 		detector_stop_flag.set_false();
+		_logger->add_write_log_task("running : detector_sendor trying to send signal???");
 		detector_stop_flag.cond_signal();
 		detector_stop_flag.unlock();
 		// cout<<"running : current state: "<<ds<<endl;
