@@ -32,10 +32,6 @@ void* detector_sender::run(){
 		}
 		pause_flag.unlock();
 
-		while(detector_sender_stop_flag.is_true()){
-			detector_sender_stop_flag.cond_wait();
-		}
-
 		sleep(DETECTOR_SLEEP_TIME_CONFIG);
 		
 		detector_stop_flag.lock();
@@ -72,11 +68,13 @@ void* detector_sender::run(){
 				}
 			}
 		}
-
 		detector_sender_stop_flag.lock();
 		detector_stop_flag.set_true();
 		detector_sender_stop_flag.unlock();	
 
+		while(detector_sender_stop_flag.is_true()){
+			detector_sender_stop_flag.cond_wait();
+		}
 		
 	}
 
