@@ -49,7 +49,7 @@ void* detector::run(){
 			detector_stop_flag.cond_wait();
 		}
 		detector_stop_flag.unlock();
-
+		_logger->add_write_log_task("running : nvm ");
 		msg_t msg_type=msg_t::TIMEOUT;
 		source[0]='\0';
 		msg_receive_buffer[0]='\0';
