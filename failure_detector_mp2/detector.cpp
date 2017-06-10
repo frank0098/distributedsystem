@@ -53,6 +53,8 @@ void* detector::run(){
 		msg_receive_buffer[0]='\0';
 		additional_ip_received[0]='\0';
 
+		_logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
+
 		if(ds==detector_state::START_PHASE){
 
 			for(auto m:*_members){
@@ -60,6 +62,7 @@ void* detector::run(){
 				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				}
+
 				_logger->add_write_log_task("Detector: Recv msgtype "+to_string(msg_type)+" from "+string(source));
 				if(msg_type==msg_t::JOIN_SUCCESS){
 					if(_am->add(string(source))){

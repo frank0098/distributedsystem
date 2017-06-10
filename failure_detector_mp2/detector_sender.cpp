@@ -43,7 +43,7 @@ void* detector_sender::run(){
 		detector_stop_flag.cond_signal();
 		detector_stop_flag.unlock();
 		// cout<<"running : current state: "<<ds<<endl;
-		_logger->add_write_log_task("running : current state: "+to_string((int)ds));
+		_logger->add_write_log_task("running : detector_sendor current state: "+to_string((int)ds));
 		if(ds==detector_state::START_PHASE){
 			for(auto m:*_members){
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN,m.c_str());
