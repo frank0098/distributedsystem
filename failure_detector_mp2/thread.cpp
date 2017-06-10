@@ -91,3 +91,7 @@ void flag_t::cond_wait(){
 flag_t stop_flag;
 
 flag_t pause_flag;
+
+flag_t detector_sender_stop_flag;
+
+flag_t detector_stop_flag;

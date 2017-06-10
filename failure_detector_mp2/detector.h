@@ -40,8 +40,7 @@ enum detector_state{
 	PING_ACK_PHASE=1,
 	SUSPICIOUS=2
 };
-extern flag_t detector_sender_stop_flag;
-extern flag_t detector_stop_flag;
+
 extern detector_state ds;
 extern std::vector<std::string> suspicious_dead_members;
 

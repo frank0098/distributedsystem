@@ -23,7 +23,8 @@ private:
 };
 extern flag_t stop_flag;
 extern flag_t pause_flag;
-
+extern flag_t detector_sender_stop_flag;
+extern flag_t detector_stop_flag;
 
 class Thread
 {

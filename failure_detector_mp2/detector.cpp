@@ -1,8 +1,7 @@
 #include "detector.h"
 
 
-flag_t detector_sender_stop_flag;
-flag_t detector_stop_flag;
+
 detector_state ds=detector_state::START_PHASE;
 std::vector<std::string> suspicious_dead_members;
 
