@@ -109,7 +109,6 @@ bool network_udp::send_msg(const char* msg,size_t msg_size,const char* port,cons
 		perror("talker: sendto");
 		return false;
 	}
-
 	freeaddrinfo(servinfo);
 	close(sockfd);
 	return true;
@@ -185,7 +184,7 @@ void network_udp::connect(){
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	struct timeval tv;
-	tv.tv_sec = 1;
+	tv.tv_sec = 2;
 	tv.tv_usec = 000000;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4

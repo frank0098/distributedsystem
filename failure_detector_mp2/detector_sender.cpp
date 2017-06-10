@@ -46,10 +46,9 @@ void* detector_sender::run(){
 
 		if(ds==detector_state::START_PHASE){
 			for(auto m:*_members){
-			cout<<m<<endl;
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN,m.c_str());
 			if(!network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,m.c_str())){
-				_logger->add_write_log_task("Detector: FAIL TO CONNECT "+m);
+				_logger->add_write_log_task("Detector: FATAL ERROR TO CONNECT "+m);
 				continue;
 				}
 			}
