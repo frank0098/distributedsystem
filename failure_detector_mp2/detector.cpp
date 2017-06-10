@@ -44,6 +44,7 @@ void* detector::run(){
 		pause_flag.unlock();
 
 		detector_stop_flag.lock();
+		_logger->add_write_log_task("running : waiting signal");
 		while(detector_stop_flag.is_true()){
 			detector_stop_flag.cond_wait();
 		}
