@@ -119,6 +119,7 @@ void* detector::run(){
 		}
 		detector_sender_stop_flag.lock();
 		detector_sender_stop_flag.set_false();
+		detector_sender_stop_flag.cond_signal();
 		detector_sender_stop_flag.unlock();
 		detector_stop_flag.lock();
 		detector_stop_flag.set_true();
