@@ -15,7 +15,7 @@ class alive_member{
 public:
 	bool add(std::string ip);
 	void remove(std::string ip);
-	std::vector<std::string> ramdom_select_K(size_t K);
+	static std::vector<std::string> random_select_K(size_t K,std::string self,std::vector<std::string> v);
 	std::vector<std::string> get_alive_member();
 	std::string get_alive_member_list();
 	bool exists(std::string ip);

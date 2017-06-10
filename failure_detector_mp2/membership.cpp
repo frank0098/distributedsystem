@@ -30,6 +30,7 @@ membership::membership(){
 	_am=new alive_member();
 	_sv=new server(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
+	_dts=new detector_sender(&(this->_members),this->_am,this->_logger);
 
 }
 
@@ -38,6 +39,7 @@ void membership::start(){
 	_sv->start();
 	_logger->start();
 	_dt->start();
+	_dts->start();
 	while(true){
 		stop_flag.lock();
 		if(stop_flag.is_true()){
@@ -54,6 +56,7 @@ membership::~membership(){
 	_sv->join();
 	_logger->join();
 	_dt->join();
+	_dts->join();
 	_sc->join();
 	cout<<"join finished"<<endl;
 	delete _sc;
@@ -61,4 +64,5 @@ membership::~membership(){
 	delete _logger;
 	delete _am;
 	delete _dt;
+	delete _dts;
 }

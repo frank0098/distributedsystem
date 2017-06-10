@@ -26,6 +26,7 @@ private:
 	server* _sv;
 	service* _sc;
 	detector* _dt;
+	detector_sender* _dts;
 	loggerThread* _logger;
 	std::list<std::string> _members;
 	alive_member* _am;
