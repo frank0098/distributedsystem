@@ -64,7 +64,7 @@ void* detector_sender::run(){
 				if(other_machines.size()==0) continue;
 				for(auto om:other_machines){
 					network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());
-					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
+					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,om.c_str());
 				}
 			}
 		}
