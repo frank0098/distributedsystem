@@ -41,19 +41,17 @@ void* detector::run(){
 		pause_flag.unlock();
 
 		detector_stop_flag.lock();
-		_logger->add_write_log_task("running : waiting signal");
 		while(detector_stop_flag.is_true()){
 			detector_stop_flag.cond_wait();
 		}
 		detector_stop_flag.unlock();
 
-		_logger->add_write_log_task("running : nvm ");
 		msg_t msg_type=msg_t::TIMEOUT;
 		source[0]='\0';
 		msg_receive_buffer[0]='\0';
 		additional_ip_received[0]='\0';
 
-		_logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
+		// _logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
 
 		if(ds==detector_state::START_PHASE){
 
@@ -94,6 +92,13 @@ void* detector::run(){
 			}
 			if(suspicious_dead_members.size()!=0){
 				ds=detector_state::SUSPICIOUS;
+				string sus_mem;
+				for(auto m:suspicious_dead_members){
+					sus_mem+=m;
+					sus_mem+=" ";
+				}
+				_logger->add_write_log_task("Detector: suspect dead members: "+sus_mem);
+
 			}
 
 		}
