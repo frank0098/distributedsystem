@@ -2,6 +2,7 @@
 
 
 bool alive_member::add(std::string ip){
+	if(ip.empty()) return false;
 	std::lock_guard<std::mutex> guard(mutex);
 	auto it = std::find(_am.begin(), _am.end(), ip);
 	if(it!=_am.end()) return false;
