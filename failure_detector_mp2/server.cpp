@@ -9,10 +9,13 @@ server::~server(){
 	delete _nw;
 	_lg->add_write_log_task("server ends");
 }
-void* server::run(){
 
+network_udp* server::get_nw(){
+	return _nw;
+}
+
+void* server::run(){
 	while(true){
-		
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();

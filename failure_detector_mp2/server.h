@@ -10,6 +10,7 @@ public:
 	server(loggerThread *lg,alive_member *am);
 	~server();
 	void* run();
+	network_udp* get_nw();
 private:
 	loggerThread* _lg;
 	network_udp* _nw;

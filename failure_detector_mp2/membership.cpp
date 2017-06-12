@@ -26,11 +26,12 @@ membership::membership(){
 	strcat(buf,"/log");
 	server_addr_read_config("server.cfg",_members);
 	_logger=new loggerThread(buf);
-	_sc=new service(this->_logger);
+	
 	_am=new alive_member();
 	_sv=new server(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 	_dts=new detector_sender(&(this->_members),this->_am,this->_logger);
+	_sc=new service(this->_logger,_sv->get_nw());
 
 }
 

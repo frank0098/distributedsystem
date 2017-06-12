@@ -1,7 +1,7 @@
 #include "service.h"
 
 
-service::service(loggerThread *lg):_lg(lg){
+service::service(loggerThread *lg,network_udp *svnw):_lg(lg),_server_nw(svnw){
 
 	_nw=new network_udp(SERVICEPORT,false);
 	_nw->connect();
@@ -42,12 +42,13 @@ void* service::run(){
 			break;
 			case msg_t::CONTROLLER_END_REMOTELY:
 			pause_flag.lock();
-			pause_flag.set_false();
-			pause_flag.cond_signal();
-			pause_flag.unlock();
 			stop_flag.lock();
 			stop_flag.set_true();
+			pause_flag.set_false();
+			pause_flag.cond_signal();
 			stop_flag.unlock();
+			pause_flag.unlock();
+			_server_nw->disconnect();
 			ret_msgtype=msg_t::ACK;
 			_lg->end_loggerThread();
 			break;
