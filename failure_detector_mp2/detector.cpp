@@ -51,7 +51,7 @@ void* detector::run(){
 		msg_receive_buffer[0]='\0';
 		additional_ip_received[0]='\0';
 
-		_logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
+		// _logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
 
 		if(ds==detector_state::START_PHASE){
 
