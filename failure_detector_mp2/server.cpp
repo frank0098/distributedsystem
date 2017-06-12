@@ -64,7 +64,7 @@ void* server::run(){
 				_am->add(string(source));
 				_lg->add_write_log_task("Server: REJOIN Add "+string(source)+" to membership list");
 			}
-			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+			// _lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
 		}
