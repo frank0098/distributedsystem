@@ -18,8 +18,9 @@ bool alive_member::add(std::string ip){
 		if(x.ip==ip) return false;
 	}
 	if(ip==machine_ip) machine_id=id_cnt;
+	std::cout<<ip<<" "<<id_cnt<<" "<<machine_ip<<std::endl;
 	_am.push_back(machine_info(ip,id_cnt++));
-	highest_id=id_cnt;
+	highest_id=std::max(id_cnt,highest_id);
 
 	return true;
 }

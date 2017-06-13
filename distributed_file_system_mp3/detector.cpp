@@ -73,6 +73,7 @@ void* detector::run(){
 					ds=detector_state::PING_ACK_PHASE;
 					election_stop_flag.lock();
 					election_stop_flag.set_false();
+					election_stop_flag.cond_signal();
 					election_stop_flag.unlock();
 				}   
 

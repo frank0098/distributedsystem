@@ -33,9 +33,12 @@ membership::membership(){
 	
 	_am=new alive_member();
 	_sv=new server(this->_logger,_am);
+	_el=new election(this->_logger,_am);
+	_ell=new election_listener(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 	_dts=new detector_sender(&(this->_members),this->_am,this->_logger);
 	_sc=new service(this->_logger,_sv->get_nw());
+
 
 }
 
@@ -43,6 +46,8 @@ void membership::start(){
 	_sc->start();
 	_sv->start();
 	_logger->start();
+	_el->start();
+	_ell->start();
 	_dt->start();
 	_dts->start();
 	while(true){
@@ -61,6 +66,8 @@ membership::~membership(){
 	_sv->join();
 	_logger->join();
 	_dt->join();
+	_el->join();
+	_ell->join();
 	_dts->join();
 	_sc->join();
 	cout<<"join finished"<<endl;
@@ -70,4 +77,6 @@ membership::~membership(){
 	delete _am;
 	delete _dt;
 	delete _dts;
+	delete _el;
+	delete _ell;
 }
