@@ -92,7 +92,7 @@ std::string alive_member::get_alive_member_list(){
 	for(auto x:_am){
 		ret+=x.ip;
 		ret+=":";
-		ret+=x.id;
+		ret+=to_string(x.id);
 		ret+=" ";
 	}
 	return ret;
