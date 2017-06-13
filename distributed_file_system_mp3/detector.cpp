@@ -27,7 +27,7 @@ void* detector::run(){
 	char additional_ip_received[INET6_ADDRSTRLEN];
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
-		
+
 		_logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		stop_flag.lock();
 		if(stop_flag.is_true()){
@@ -109,6 +109,7 @@ void* detector::run(){
 
 		}
 		else if(ds==detector_state::SUSPICIOUS){
+			_logger->add_write_log_task("DETECTOR Suspicious state");
 			for(auto m:suspicious_dead_members){
 				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
@@ -125,11 +126,13 @@ void* detector::run(){
 				_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 				if(m==coordinator){
 					election_stop_flag.lock();
+					election_listener_stop_flag.lock();
 					if(election_stop_flag.is_true() && election_listener_stop_flag.is_true()){
 						failure_process=m;
 						election_stop_flag.set_false();
 						election_stop_flag.cond_signal();
 					}
+					election_listener_stop_flag.unlock();
 					election_stop_flag.unlock();
 				}
 			}
