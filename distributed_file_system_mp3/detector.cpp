@@ -120,6 +120,7 @@ void* detector::run(){
 					    suspicious_dead_members.erase(it);
 				}
 			}
+			_logger->add_write_log_task("DETECTOR Suspicious state hehehe");
 			for(auto m:suspicious_dead_members){
 				_am->remove(m);
 				_logger->add_write_log_task("Detector: remove "+m+" from membership list");
@@ -137,6 +138,7 @@ void* detector::run(){
 				}
 			}
 			ds=detector_state::PING_ACK_PHASE;
+			_logger->add_write_log_task("DETECTOR Suspicious  finihsed");
 		}
 		detector_sender_stop_flag.lock();
 		detector_sender_stop_flag.set_false();
@@ -145,6 +147,7 @@ void* detector::run(){
 		detector_stop_flag.lock();
 		detector_stop_flag.set_true();
 		detector_stop_flag.unlock();
+		
 	}
 	return nullptr;
 }
