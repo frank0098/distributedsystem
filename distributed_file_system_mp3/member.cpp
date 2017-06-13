@@ -91,6 +91,8 @@ std::string alive_member::get_alive_member_list(){
 	std::string ret;
 	for(auto x:_am){
 		ret+=x.ip;
+		ret+=":";
+		ret+=x.id;
 		ret+=" ";
 	}
 	return ret;
