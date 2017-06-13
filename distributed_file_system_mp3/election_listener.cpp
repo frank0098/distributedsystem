@@ -20,6 +20,7 @@ void* election_listener::run(){
 	char additional_ip_received[INET6_ADDRSTRLEN];
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
+		_lg->add_write_log_task("Election listner ongoing");
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();
