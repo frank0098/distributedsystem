@@ -22,6 +22,7 @@ void* server::run(){
 			break;
 		}
 		stop_flag.unlock();
+		_lg->add_write_log_task("SERVER: coordinator: "+coordinator);
 		// pause_flag.lock();
 		// while(pause_flag.is_true()){
 		// 	pause_flag.cond_wait();
