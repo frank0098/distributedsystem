@@ -117,7 +117,7 @@ void* server::run(){
 			election_listener_stop_flag.unlock();
 			election_stop_flag.unlock();
 			coordinator=string(source);
-			_lg->add_write_log_task("ELECTOR coordinator: "+coordinator);
+			_lg->add_write_log_task("SERVER coordinator: "+coordinator);
 
 		}
 
