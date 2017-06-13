@@ -1,0 +1,65 @@
+#include "election.h"
+
+election::election(loggerThread* lg):_lg(lg){
+	_lg->add_write_log_task("election start");
+	_nw=new network_udp(ELECTIONPORT,true);
+	_nw->connect();
+	election_listener_stop_flag.lock();
+	election_listener_stop_flag.set_true();
+	election_listener_stop_flag.unlock();
+}
+server::~server(){
+	_nw->disconnect();
+	delete _nw;
+	_lg->add_write_log_task("election ends");
+}
+
+void* server::run(){
+	char source[INET6_ADDRSTRLEN];
+	char msg_receive_buffer[BUFFER_SIZE];
+	char additional_ip_received[INET6_ADDRSTRLEN];
+	char msg_send_buffer[BUFFER_SIZE];
+	while(true){
+		stop_flag.lock();
+		if(stop_flag.is_true()){
+			stop_flag.unlock();
+			break;
+		}
+		stop_flag.unlock();
+		election_listener_stop_flag.lock();
+		while(election_listener_stop_flag.is_true()){
+			election_listener_stop_flag.cond_wait();
+		}
+		election_listener_stop_flag.unlock();
+		msg_t msg_type=msg_t::TIMEOUT;
+		source[0]='\0';
+		msg_receive_buffer[0]='\0';
+		additional_ip_received[0]='\0';
+		int higher_cnt=0;
+		int higher_total=0;
+		for(auto p:machines_info){
+			if(p.id>machine_id){
+				msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
+				if(msg_type==msg_t::ELECTION_OK){
+					higher_cnt++;
+				}
+				higher_total++;
+			}
+		}
+		if(higher_total==0){
+			_lg->add_write_log_task("BUG IN ELECTOR!!!!!");
+		}
+		if(higher_cnt==0){
+			coordinator=machine_ip;
+			highest_id=machine_id;
+			election_listener_stop_flag.lock();
+			election_listener_stop_flag.set_true();
+			election_listener_stop_flag.unlock();
+		}
+		
+		election_stop_flag.lock();
+		election_stop_flag.set_false();
+		election_stop_flag.unlock();
+		
+	}
+}
