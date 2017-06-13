@@ -27,7 +27,7 @@ void* election::run(){
 			election_stop_flag.cond_wait();
 		}
 		election_stop_flag.unlock();
-
+		_lg->add_write_log_task("DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		if(machine_id==highest_id){
 			coordinator=machine_ip;
 			_lg->add_write_log_task("coordinator: "+coordinator);

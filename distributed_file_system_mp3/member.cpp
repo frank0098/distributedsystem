@@ -12,13 +12,10 @@ bool alive_member::add(std::string ip){
 	// static int id_cnt=0;
 	if(ip.empty()) return false;
 	std::lock_guard<std::mutex> guard(mutex);
-	// auto it = std::find(_am.begin(), _am.end(), ip);
-	// if(it!=_am.end()) return false;
 	for(auto x:_am){
 		if(x.ip==ip) return false;
 	}
 	if(ip==machine_ip) machine_id=ip_mapping[ip];
-	// std::cout<<ip<<" "<<id_cnt<<" "<<machine_ip<<std::endl;
 	_am.push_back(machine_info(ip,ip_mapping[ip]));
 	highest_id=std::max(ip_mapping[ip],highest_id);
 
@@ -30,8 +27,6 @@ void alive_member::remove(std::string ip){
 	// auto it = std::find(_am.begin(), _am.end(), ip);
 	for(auto it=_am.begin();it!=_am.end();++it){
 		if((*it).ip==ip){
-			// std::swap(it,_am.end()-1);
-			// _am.pop_back();
 			if((*it).id==highest_id){
 				int second_highest_id=-1;
 				for(auto itt=_am.begin();itt!=_am.end();++it){
