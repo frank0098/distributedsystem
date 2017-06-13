@@ -12,12 +12,12 @@ bool alive_member::add(std::string ip){
 	// static int id_cnt=0;
 	if(ip.empty()) return false;
 	std::lock_guard<std::mutex> guard(mutex);
+	highest_id=std::max(ip_mapping[ip],highest_id);
 	for(auto x:_am){
 		if(x.ip==ip) return false;
 	}
 	if(ip==machine_ip) machine_id=ip_mapping[ip];
 	_am.push_back(machine_info(ip,ip_mapping[ip]));
-	highest_id=std::max(ip_mapping[ip],highest_id);
 
 	return true;
 }
