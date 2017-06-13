@@ -35,12 +35,12 @@ void* detector::run(){
 			break;
 		}
 		stop_flag.unlock();
-		// pause_flag.lock();
-		// while(pause_flag.is_true()){
-		// 	pause_flag.cond_wait();
-		// 	ds=detector_state::START_PHASE;
-		// }
-		// pause_flag.unlock();
+		pause_flag.lock();
+		while(pause_flag.is_true()){
+			pause_flag.cond_wait();
+			ds=detector_state::START_PHASE;
+		}
+		pause_flag.unlock();
 
 		detector_stop_flag.lock();
 		while(detector_stop_flag.is_true()){

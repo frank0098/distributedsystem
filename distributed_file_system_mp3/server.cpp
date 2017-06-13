@@ -23,11 +23,11 @@ void* server::run(){
 		}
 		stop_flag.unlock();
 		// _lg->add_write_log_task("SERVER: coordinator: "+coordinator);
-		// pause_flag.lock();
-		// while(pause_flag.is_true()){
-		// 	pause_flag.cond_wait();
-		// }
-		// pause_flag.unlock();
+		pause_flag.lock();
+		while(pause_flag.is_true()){
+			pause_flag.cond_wait();
+		}
+		pause_flag.unlock();
 
 		char source[INET6_ADDRSTRLEN];
 		char msg_receive_buffer[BUFFER_SIZE];
