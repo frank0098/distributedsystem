@@ -109,7 +109,6 @@ void* detector::run(){
 
 		}
 		else if(ds==detector_state::SUSPICIOUS){
-			_logger->add_write_log_task("DETECTOR Suspicious state");
 			for(auto m:suspicious_dead_members){
 				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
@@ -120,7 +119,6 @@ void* detector::run(){
 					    suspicious_dead_members.erase(it);
 				}
 			}
-			_logger->add_write_log_task("DETECTOR Suspicious state hehehe");
 			for(auto m:suspicious_dead_members){
 				_am->remove(m);
 				_logger->add_write_log_task("Detector: remove "+m+" from membership list");
@@ -138,7 +136,6 @@ void* detector::run(){
 				}
 			}
 			ds=detector_state::PING_ACK_PHASE;
-			_logger->add_write_log_task("DETECTOR Suspicious  finihsed");
 		}
 		detector_sender_stop_flag.lock();
 		detector_sender_stop_flag.set_false();
@@ -147,7 +144,7 @@ void* detector::run(){
 		detector_stop_flag.lock();
 		detector_stop_flag.set_true();
 		detector_stop_flag.unlock();
-		
+
 	}
 	return nullptr;
 }

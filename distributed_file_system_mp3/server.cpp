@@ -23,7 +23,7 @@ void* server::run(){
 		}
 		stop_flag.unlock();
 		// _lg->add_write_log_task("SERVER: coordinator: "+coordinator);
-		_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+		// _lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 		pause_flag.lock();
 		while(pause_flag.is_true()){
 			pause_flag.cond_wait();

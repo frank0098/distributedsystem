@@ -57,7 +57,7 @@ void* election_listener::run(){
 		election_listener_stop_flag.set_true();
 		election_listener_stop_flag.unlock();
 		if(higher_cnt==0){
-			_lg->add_write_log_task("ELECTOR LISTNER: coordinator: "+coordinator);
+			_lg->add_write_log_task("ELECTOR LISTNER: coordinator: "+coordinator+ " machine id: "+std::to_string(machine_id));
 			coordinator=machine_ip;
 			highest_id=machine_id;
 		}
