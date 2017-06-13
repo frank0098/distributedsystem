@@ -48,7 +48,7 @@ void* election_listener::run(){
 			}
 		}
 		if(higher_total==0){
-			_lg->add_write_log_task("BUG IN ELECTOR!!!!!");
+			_lg->add_write_log_task("BUG IN ELECTOR!!!!! machine id: "+std::to_string(machine_id));
 		}
 		// if receives some answers within timeout
 
