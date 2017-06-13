@@ -57,9 +57,15 @@ void* election_listener::run(){
 		election_listener_stop_flag.set_true();
 		election_listener_stop_flag.unlock();
 		if(higher_cnt==0){
-			_lg->add_write_log_task("ELECTOR LISTNER: coordinator: "+coordinator+ " machine id: "+std::to_string(machine_id));
 			coordinator=machine_ip;
 			highest_id=machine_id;
+			_lg->add_write_log_task("ELECTOR LISTNER: coordinator: "+coordinator+ " machine id: "+std::to_string(machine_id));
+			for(auto p:_am->get_alive_member_with_id()){
+				if(p.id<machine_id){
+					network_udp::generate_msg(msg_send_buffer,msg_t::COORDINATOR,source);
+					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,(p.ip).c_str());
+				}
+			}
 		}
 		else{
 			election_stop_flag.lock();
