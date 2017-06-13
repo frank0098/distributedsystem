@@ -13,6 +13,7 @@ bool alive_member::add(std::string ip){
 	if(ip.empty()) return false;
 	std::lock_guard<std::mutex> guard(mutex);
 	highest_id=std::max(ip_mapping[ip],highest_id);
+	if(ip_mapping[ip]==highest_id) coordinator=ip;
 	for(auto x:_am){
 		if(x.ip==ip) return false;
 	}

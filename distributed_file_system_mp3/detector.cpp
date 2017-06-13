@@ -28,19 +28,19 @@ void* detector::run(){
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
 
-		_logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
+		// _logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();
 			break;
 		}
 		stop_flag.unlock();
-		pause_flag.lock();
-		while(pause_flag.is_true()){
-			pause_flag.cond_wait();
-			ds=detector_state::START_PHASE;
-		}
-		pause_flag.unlock();
+		// pause_flag.lock();
+		// while(pause_flag.is_true()){
+		// 	pause_flag.cond_wait();
+		// 	ds=detector_state::START_PHASE;
+		// }
+		// pause_flag.unlock();
 
 		detector_stop_flag.lock();
 		while(detector_stop_flag.is_true()){
@@ -73,10 +73,10 @@ void* detector::run(){
 						_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 					}
 					ds=detector_state::PING_ACK_PHASE;
-					election_stop_flag.lock();
-					election_stop_flag.set_false();
-					election_stop_flag.cond_signal();
-					election_stop_flag.unlock();
+					// election_stop_flag.lock();
+					// election_stop_flag.set_false();
+					// election_stop_flag.cond_signal();
+					// election_stop_flag.unlock();
 				}   
 
 					
