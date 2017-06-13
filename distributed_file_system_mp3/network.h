@@ -43,7 +43,8 @@ enum msg_t {
 	CONTROLLER_END_REMOTELY='n',
 	JOIN_SUCCESS='o',
 	ELECTION='p',
-	ELECTION_OK='q'
+	ELECTION_OK='q',
+	COORDINATOR='r'
 
 };
 #define PORT "5000"

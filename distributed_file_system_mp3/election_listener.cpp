@@ -1,6 +1,6 @@
 #include "election.h"
 
-election::election(loggerThread* lg):_lg(lg){
+election_listener::election_listener(loggerThread* lg,alive_member *am):_lg(lg),_am(am){
 	_lg->add_write_log_task("election start");
 	_nw=new network_udp(ELECTIONPORT,true);
 	_nw->connect();
@@ -8,13 +8,13 @@ election::election(loggerThread* lg):_lg(lg){
 	election_listener_stop_flag.set_true();
 	election_listener_stop_flag.unlock();
 }
-server::~server(){
+election_listener::~election_listener(){
 	_nw->disconnect();
 	delete _nw;
 	_lg->add_write_log_task("election ends");
 }
 
-void* server::run(){
+void* election_listener::run(){
 	char source[INET6_ADDRSTRLEN];
 	char msg_receive_buffer[BUFFER_SIZE];
 	char additional_ip_received[INET6_ADDRSTRLEN];
@@ -31,13 +31,14 @@ void* server::run(){
 			election_listener_stop_flag.cond_wait();
 		}
 		election_listener_stop_flag.unlock();
+
 		msg_t msg_type=msg_t::TIMEOUT;
 		source[0]='\0';
 		msg_receive_buffer[0]='\0';
 		additional_ip_received[0]='\0';
 		int higher_cnt=0;
 		int higher_total=0;
-		for(auto p:machines_info){
+		for(auto p:_am->get_alive_member_with_id()){
 			if(p.id>machine_id){
 				msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				if(msg_type==msg_t::ELECTION_OK){
@@ -49,17 +50,21 @@ void* server::run(){
 		if(higher_total==0){
 			_lg->add_write_log_task("BUG IN ELECTOR!!!!!");
 		}
+		// if receives some answers within timeout
+
+		election_listener_stop_flag.lock();
+		election_listener_stop_flag.set_true();
+		election_listener_stop_flag.unlock();
 		if(higher_cnt==0){
 			coordinator=machine_ip;
 			highest_id=machine_id;
-			election_listener_stop_flag.lock();
-			election_listener_stop_flag.set_true();
-			election_listener_stop_flag.unlock();
 		}
-		
-		election_stop_flag.lock();
-		election_stop_flag.set_false();
-		election_stop_flag.unlock();
-		
+		else{
+			election_stop_flag.lock();
+			election_stop_flag.set_false();
+			election_stop_flag.cond_signal();
+			election_stop_flag.unlock();
+		}
+
 	}
 }

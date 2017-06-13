@@ -71,6 +71,9 @@ void* detector::run(){
 						_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 					}
 					ds=detector_state::PING_ACK_PHASE;
+					election_stop_flag.lock();
+					election_stop_flag.set_false();
+					election_stop_flag.unlock();
 				}   
 
 					
@@ -133,58 +136,6 @@ void* detector::run(){
 	}
 	return nullptr;
 }
-		
-		// if(msg_type==msg_t::JOIN_SUCCESS){
 
-		// 	if(_am->add(m)){
-		// 			_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
-		// 			_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
-		// 	}
-		// 	else{
-		// 			_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
-		// 	}
-		// }   
-		// else if(msg_type==msg_t::ACK) continue;
-
-
-		// else if(msg_type==msg_t::TIMEOUT){
-		// 	_logger->add_write_log_task("Detector: receive " + to_string((char)(msg_type))+" :"+m+" might have FAILED.SEND QUERY");
-		// 	bool failflag=true;
-		// 	std::vector<std::string> other_machines=_am->ramdom_select_K(2);
-		// 	if(other_machines.size()==0) continue;
-		// 	for(auto om:other_machines){
-
-		// 		network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());
-		// 		network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
-		// 		msg_t indirectmsgtype=msg_t::TIMEOUT;
-		// 		if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
-		// 			indirectmsgtype=network_udp::get_response(msg_receive_buffer,additional_ip_received);
-		// 		}
-
-		// 		if(string(source)==om && string(additional_ip_received)==m && indirectmsgtype==msg_t::QUERY_SUCCESS){
-		// 			failflag=false;
-		// 			break;
-		// 		}
-		// 	}
-		// 	if(failflag){
-		// 		_am->remove(m);
-		// 		_logger->add_write_log_task("Detector: remove "+m+" from membership list");
-		// 		_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
-		// 		for(auto om:alivemembers){
-		// 			if(om!=m){
-		// 				network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,m.c_str());
-		// 				network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,om.c_str());
-		// 			}
-		// 		}
-		// 	}
-		// }
-		// else if(msg_type==msg_t::QUERY_SUCCESS){
-		// 	continue;
-		// }
-		// else{
-		// 	_logger->add_write_log_task("Detector: ===  ERROR ===  recv msg from "+m);
-		// }
-
-		
 
 
