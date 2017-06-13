@@ -5,7 +5,6 @@ detector_sender::detector_sender(std::list<string> *mem, alive_member *am,logger
 }
 detector_sender::~detector_sender(){
 	_logger->add_write_log_task("detector sender ends");
-	// cout<<"END DETECTOR"<<endl;
 }	
 
 void* detector_sender::run(){

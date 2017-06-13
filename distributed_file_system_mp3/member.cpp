@@ -7,6 +7,7 @@ std::string machine_ip;
 int machine_id=-1;
 int highest_id=-1;
 std::map<std::string,int> ip_mapping;
+std::string failure_process;
 
 bool alive_member::add(std::string ip){
 	// static int id_cnt=0;

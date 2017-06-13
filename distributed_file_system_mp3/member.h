@@ -24,6 +24,7 @@ extern std::string machine_ip;
 extern int machine_id;
 extern int highest_id;
 extern std::map<std::string,int> ip_mapping;
+extern std::string failure_process;
 
 class alive_member{
 public:

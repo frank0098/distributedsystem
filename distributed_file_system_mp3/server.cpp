@@ -22,7 +22,7 @@ void* server::run(){
 			break;
 		}
 		stop_flag.unlock();
-		_lg->add_write_log_task("SERVER: coordinator: "+coordinator);
+		// _lg->add_write_log_task("SERVER: coordinator: "+coordinator);
 		// pause_flag.lock();
 		// while(pause_flag.is_true()){
 		// 	pause_flag.cond_wait();
@@ -90,6 +90,32 @@ void* server::run(){
 			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 			network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);	
+		}
+		else if(msg_type==msg_t::ELECTION){
+			network_udp::generate_msg(msg_send_buffer,msg_t::ELECTION_OK,source);
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,ELECTIONPORT,source);
+
+			if(string(additional_ip_received)==failure_process) continue;
+			
+			failure_process=string(additional_ip_received);
+			election_stop_flag.lock();
+			election_listener_stop_flag.lock();
+			if(election_stop_flag.is_true() && election_listener_stop_flag.is_true()){
+				election_stop_flag.set_false();
+				election_stop_flag.cond_signal();
+			}
+			election_listener_stop_flag.unlock();
+			election_stop_flag.unlock();
+		}
+		else if(msg_type==msg_t::COORDINATOR){
+			election_stop_flag.lock();
+			election_listener_stop_flag.lock();
+			election_stop_flag.set_true();
+			election_listener_stop_flag.set_true();
+			election_listener_stop_flag.unlock();
+			election_stop_flag.unlock();
+			coordinator=string(source);
+
 		}
 
 		// cout<<"server send "<<response_type<<endl;

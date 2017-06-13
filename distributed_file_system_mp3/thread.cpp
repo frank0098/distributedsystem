@@ -100,3 +100,5 @@ flag_t election_stop_flag;
 
 flag_t election_listener_stop_flag;
 
+flag_t election_in_progress_flag;
+

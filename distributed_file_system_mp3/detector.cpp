@@ -73,10 +73,7 @@ void* detector::run(){
 						_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 					}
 					ds=detector_state::PING_ACK_PHASE;
-					// election_stop_flag.lock();
-					// election_stop_flag.set_false();
-					// election_stop_flag.cond_signal();
-					// election_stop_flag.unlock();
+
 				}   
 
 					
@@ -126,6 +123,15 @@ void* detector::run(){
 				_am->remove(m);
 				_logger->add_write_log_task("Detector: remove "+m+" from membership list");
 				_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+				if(m==coordinator){
+					election_stop_flag.lock();
+					if(election_stop_flag.is_true() && election_listener_stop_flag.is_true()){
+						failure_process=m;
+						election_stop_flag.set_false();
+						election_stop_flag.cond_signal();
+					}
+					election_stop_flag.unlock();
+				}
 			}
 			ds=detector_state::PING_ACK_PHASE;
 		}

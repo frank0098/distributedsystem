@@ -13,7 +13,6 @@ election::~election(){
 void* election::run(){
 	char source[INET6_ADDRSTRLEN];
 	char msg_receive_buffer[BUFFER_SIZE];
-	char additional_ip_received[INET6_ADDRSTRLEN];
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
 		stop_flag.lock();
@@ -30,11 +29,11 @@ void* election::run(){
 		_lg->add_write_log_task("DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		if(machine_id==highest_id){
 			coordinator=machine_ip;
-			_lg->add_write_log_task("coordinator: "+coordinator);
+			_lg->add_write_log_task("ELECTOR coordinator: "+coordinator);
 			for(auto p:_am->get_alive_member_with_id()){
 				if(p.id<machine_id){
 					network_udp::generate_msg(msg_send_buffer,msg_t::COORDINATOR,source);
-					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,source);
+					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,(p.ip).c_str());
 				}
 			}
 		}
@@ -45,8 +44,8 @@ void* election::run(){
 			election_listener_stop_flag.unlock();
 			for(auto p:_am->get_alive_member_with_id()){
 				if(p.id>machine_id){
-					network_udp::generate_msg(msg_send_buffer,msg_t::ELECTION,source);
-					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,source);
+					network_udp::generate_msg(msg_send_buffer,msg_t::ELECTION,coordinator.c_str());
+					network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,(p.ip).c_str());
 				}
 			}
 		}
