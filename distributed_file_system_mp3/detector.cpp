@@ -28,7 +28,7 @@ void* detector::run(){
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
 
-		_logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
+		// _logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();

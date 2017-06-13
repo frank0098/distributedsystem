@@ -110,7 +110,6 @@ void* server::run(){
 			election_stop_flag.unlock();
 		}
 		else if(msg_type==msg_t::COORDINATOR){
-			_lg->add_write_log_task("SERVER: RECEIVE COORDINATOR FROM "+string(source));
 			election_stop_flag.lock();
 			election_listener_stop_flag.lock();
 			election_stop_flag.set_true();
@@ -118,6 +117,7 @@ void* server::run(){
 			election_listener_stop_flag.unlock();
 			election_stop_flag.unlock();
 			coordinator=string(source);
+			_lg->add_write_log_task("ELECTOR coordinator: "+coordinator);
 
 		}
 
