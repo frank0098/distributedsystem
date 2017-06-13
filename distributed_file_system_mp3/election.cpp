@@ -15,6 +15,7 @@ void* election::run(){
 	char msg_receive_buffer[BUFFER_SIZE];
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
+		_lg->add_write_log_task("Election ongoing");
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();

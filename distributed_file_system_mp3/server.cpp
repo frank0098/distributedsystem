@@ -92,11 +92,12 @@ void* server::run(){
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);	
 		}
 		else if(msg_type==msg_t::ELECTION){
+			_lg->add_write_log_task("SERVER: RECEIVE ELECTION FROM "+string(source));
 			network_udp::generate_msg(msg_send_buffer,msg_t::ELECTION_OK,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,ELECTIONPORT,source);
 
 			if(string(additional_ip_received)==failure_process) continue;
-			
+
 			failure_process=string(additional_ip_received);
 			election_stop_flag.lock();
 			election_listener_stop_flag.lock();
@@ -108,6 +109,7 @@ void* server::run(){
 			election_stop_flag.unlock();
 		}
 		else if(msg_type==msg_t::COORDINATOR){
+			_lg->add_write_log_task("SERVER: RECEIVE COORDINATOR FROM "+string(source));
 			election_stop_flag.lock();
 			election_listener_stop_flag.lock();
 			election_stop_flag.set_true();
