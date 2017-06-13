@@ -6,10 +6,10 @@ std::string coordinator;
 std::string machine_ip;
 int machine_id=-1;
 int highest_id=-1;
-
+std::map<std::string,int> ip_mapping;
 
 bool alive_member::add(std::string ip){
-	static int id_cnt=0;
+	// static int id_cnt=0;
 	if(ip.empty()) return false;
 	std::lock_guard<std::mutex> guard(mutex);
 	// auto it = std::find(_am.begin(), _am.end(), ip);
@@ -17,10 +17,10 @@ bool alive_member::add(std::string ip){
 	for(auto x:_am){
 		if(x.ip==ip) return false;
 	}
-	if(ip==machine_ip) machine_id=id_cnt;
-	std::cout<<ip<<" "<<id_cnt<<" "<<machine_ip<<std::endl;
-	_am.push_back(machine_info(ip,id_cnt++));
-	highest_id=std::max(id_cnt,highest_id);
+	if(ip==machine_ip) machine_id=ip_mapping[ip];
+	// std::cout<<ip<<" "<<id_cnt<<" "<<machine_ip<<std::endl;
+	_am.push_back(machine_info(ip,ip_mapping[ip]));
+	highest_id=std::max(ip_mapping[ip],highest_id);
 
 	return true;
 }

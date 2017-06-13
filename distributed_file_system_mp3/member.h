@@ -10,6 +10,7 @@
 #include <time.h>
 #include <algorithm>
 #include <iostream>
+#include <map>
 
 struct machine_info{
 	std::string ip;
@@ -22,6 +23,7 @@ extern std::string coordinator;
 extern std::string machine_ip;
 extern int machine_id;
 extern int highest_id;
+extern std::map<std::string,int> ip_mapping;
 
 class alive_member{
 public:

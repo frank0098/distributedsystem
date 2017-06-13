@@ -7,6 +7,7 @@ void server_addr_read_config(string config_file_path,std::list<string>& all_memb
 	std::ifstream in(config_file_path);
 	string ip_addr;
 	struct sockaddr_in sa;
+	int i=0;
 	while(in>>ip_addr){
 		const char* tmp_addr=ip_addr.c_str(); 
 		if(inet_pton(AF_INET,tmp_addr,&(sa.sin_addr))==0 &&
@@ -15,6 +16,7 @@ void server_addr_read_config(string config_file_path,std::list<string>& all_memb
 		}
 		else{
 			all_member.push_back(ip_addr);
+			ip_mapping[ip_addr]=i++;
 		}
 	}
   	machine_ip=string(getenv ("SELFIP"));
