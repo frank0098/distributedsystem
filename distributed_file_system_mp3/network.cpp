@@ -184,7 +184,7 @@ void network_udp::connect(){
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	struct timeval tv;
-	tv.tv_sec = 4;
+	tv.tv_sec = 2;
 	tv.tv_usec = 000000;
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_UNSPEC; // set to AF_INET to force IPv4
