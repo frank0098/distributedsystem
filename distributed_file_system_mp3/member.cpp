@@ -31,7 +31,7 @@ void alive_member::remove(std::string ip){
 		if((*it).ip==ip){
 			if((*it).id==highest_id){
 				int second_highest_id=-1;
-				for(auto itt=_am.begin();itt!=_am.end();++it){
+				for(auto itt=_am.begin();itt!=_am.end();++itt){
 					int curid=(*itt).id;
 					if(curid>=second_highest_id &&  curid!=highest_id){
 						second_highest_id=curid;
