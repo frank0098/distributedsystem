@@ -2,19 +2,27 @@ CC=g++
 
 CFLAGS=-c -Wall -std=c++11
 
-OBJECTS= main.o membership.o server.o detector.o network.o logger.o thread.o member.o service.o workQueue.o detector_sender.o election_listener.o election.o
+OBJECTS= main.o membership.o server.o detector.o network.o logger.o thread.o member.o service.o workQueue.o detector_sender.o election_listener.o election.o file_server.o
 
 REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o
 
+DFS_CLIENT_OBJECTS=dfs_client.o network.o
+
 .PHONY: all clean
 
-all: dfs remotecontroller
+all: dfs remotecontroller client
 
 remotecontroller: remotecontroller.o
 	$(CC) $(REMOTECONTROLLER_OBJECTS) -o remotecontroller.out
 
 dfs:$(OBJECTS)
 	$(CC) $(OBJECTS) $(DEBUG) -pthread -o dfs.out
+
+client: dfs_client.o
+	$(CC) $(DFS_CLIENT_OBJECTS) -o client.out
+
+dfs_client.o: dfs_client.cpp network.h
+	$(CC) $(CFLAGS) dfs_client.cpp
 
 remotecontroller.o: remotecontroller.cpp network.h
 	$(CC) $(CFLAGS) remotecontroller.cpp
@@ -24,6 +32,9 @@ main.o: main.cpp membership.h
 
 membership.o: membership.cpp membership.h server.h detector.h network.h logger.h thread.h member.h thread.h service.h workQueue.h
 	$(CC) $(CFLAGS) membership.cpp
+
+file_server.o: file_server.cpp file_server.h network.h logger.h thread.h member.h
+	$(CC) $(CFLAGS) file_server.cpp
 
 election.o: election.cpp election.h network.h logger.h thread.h member.h
 	$(CC) $(CFLAGS) $(DEBUG) election.cpp

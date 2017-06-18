@@ -24,7 +24,11 @@
 #include <pwd.h>
 #include <string>
 #include <signal.h>
-
+#include <sys/stat.h>
+#include <libgen.h>
+#define MAXDATASIZE 1000
+#define USERAGENT "Wget/1.12 (linux-gnu)"
+#define CONNECTIONTYPE "Keep-Alive"
 
 enum msg_t {
 	TIMEOUT='a',
@@ -52,8 +56,9 @@ enum msg_t {
 #define DETECTORPORT "5002"
 #define SERVICEPORT "5003"
 #define ELECTIONPORT "5004"
+#define FILE_SERVER_PORT "5005"
 #define BACKLOG 10
-#define BUFFER_SIZE 200
+#define BUFFER_SIZE 300
 
 class network{
 public:
@@ -68,20 +73,24 @@ protected:
 	bool _connected;
 	std::string _hostname;
 	int _sockfd;
+	const char* _PORT;
 };
 
 class network_server:public network{
 public:
-	network_server();
+	network_server(const char* port);
 	void connect() override;
-	static bool server_send(int sockfd,msg_t msgtype);
-	static msg_t recv_msg(int sockfd);
+	void serve_forever();
+	// static bool server_send(int sockfd,msg_t msgtype);
+	// static msg_t recv_msg(int sockfd);
+
 };
 
 class network_client:public network{
 public:
-	network_client(std::string hostname);
+	network_client(std::string hostname,const char* port);
 	void connect() override;
+	bool file_server_client(char* filename);
 	msg_t recv_msg();
 };
 
@@ -96,7 +105,6 @@ public:
 	static void generate_msg(char* msg,msg_t msgtype,const char* ip_addr);
 	static msg_t get_response(char* msg,char* ip_addr);
 private:
-	const char* _PORT;
 	bool _settimeout;
 
 };

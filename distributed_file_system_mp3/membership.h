@@ -9,6 +9,7 @@
 #include "thread.h"
 #include "service.h"
 #include "election.h"
+#include "file_server.h"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -34,5 +35,6 @@ private:
 	loggerThread* _logger;
 	std::list<std::string> _members;
 	alive_member* _am;
+	file_server* _fs;
 };
 #endif

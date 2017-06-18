@@ -83,10 +83,13 @@ void* detector::run(){
 		}
 		else if(ds==detector_state::PING_ACK_PHASE){
 			suspicious_dead_members=_am->get_alive_member();
-			for(auto m:_am->get_alive_member()){
+			int sze=_am->get_alive_member().size();
+			int i=0;
+			while(i<sze){
 				if(_nw->recv_msg(msg_receive_buffer,BUFFER_SIZE,source)){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				}
+				if(msg_type==msg_t::QUERY_SUCCESS) continue;
 				if(msg_type==msg_t::ACK){
 					auto it = std::find(suspicious_dead_members.begin(), suspicious_dead_members.end(), string(source));
 					if(it != suspicious_dead_members.end())
@@ -95,6 +98,7 @@ void* detector::run(){
 				else{
 					_logger->add_write_log_task("Detector: recv msg: "+to_string(msg_type));
 				}
+				i++;
 			}
 			if(suspicious_dead_members.size()!=0){
 				ds=detector_state::SUSPICIOUS;

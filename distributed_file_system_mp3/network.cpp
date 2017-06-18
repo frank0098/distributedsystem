@@ -3,12 +3,12 @@
 network::network(std::string hostname):_connected(false),_hostname(hostname),_sockfd(-1){
 
 }
-network_server::network_server():network(""){
-
+network_server::network_server(const char* port):network(""){
+	_PORT=port;
 }
 
-network_client::network_client(std::string hostname):network(hostname){
-
+network_client::network_client(std::string hostname,const char* port):network(hostname){
+	_PORT=port;
 }
 
 network_udp::network_udp(const char* port,bool stm):network(""){
@@ -231,13 +231,13 @@ void network_udp::connect(){
 }
 
 
-bool network_server::server_send(int sockfd,msg_t msgtype){
-	if(send(sockfd,&msgtype,sizeof(msgtype),0)==-1){
-		perror("send error");
-		return false;
-	}
-	return true;
-}
+// bool network_server::server_send(int sockfd,msg_t msgtype){
+// 	if(send(sockfd,&msgtype,sizeof(msgtype),0)==-1){
+// 		perror("send error");
+// 		return false;
+// 	}
+// 	return true;
+// }
 
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -253,6 +253,7 @@ void sigchld_handler(int s){
 	while(waitpid(-1,NULL,WNOHANG)>0);
 	errno=saved_errno;
 }
+
 
 void network_server::connect(){
 	int sockfd,yes=1,rv;
@@ -356,6 +357,135 @@ void network_client::connect(){
 
 }
 
+const char *server_response_msg = "HTTP/1.1 %s\r\nThe file requested is %s with SIZE %s\r\n\r\n";
+
+bool network_client::file_server_client(char* filename){
+	char query[BUFFER_SIZE];
+	char buf[BUFFER_SIZE+1];
+	const char *msg = "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nHost: %s:%s\r\nConnection: %s\r\n\r\n";
+	sprintf(query,msg,filename,USERAGENT,_hostname.c_str(),_PORT,CONNECTIONTYPE);
+	cout<<"debug"<<query<<endl;
+	if((send(_sockfd,query,BUFFER_SIZE,0))<0){
+		perror("cannot send query");
+		exit(1);
+	}
+	if(recv(_sockfd,buf,BUFFER_SIZE,0)==-1){
+		perror("recv");
+		exit(1);
+	}
+	char info[30];
+	char file_size[30];
+	file_size[0]='\0';
+	sscanf(buf, server_response_msg, info,filename,file_size);
+	if(strcmp(info,"200")!=0) return false;
+	std::ofstream outfile(filename);
+	outfile.close();
+	  outfile.open(filename, std::ios_base::app);
+	  int data_recv=0;
+	  int file_size_left=atoi(file_size);
+	  while(file_size_left>0){
+	  	buf[0]='\0';
+	  	int cur_recv=recv(_sockfd,buf,std::min(BUFFER_SIZE,file_size_left),0);
+	  	cout<<"buf"<<buf<<endl;
+	  	if(cur_recv<=0){
+	  		perror("file_server_recv");
+	  		return false;
+	  	}
+	  	file_size_left-=cur_recv;
+	  	buf[cur_recv]='\0';
+	  	outfile<<buf;
+	 }
+	 outfile.close();
+	return true;
+}
+void network_server::serve_forever(){
+	socklen_t sin_size;
+	struct sockaddr_storage their_addr;
+	int new_fd;
+	char s[INET6_ADDRSTRLEN];
+	int numbytes=0;
+	char buf[MAXDATASIZE];
+	const char *client_msg = "GET %s HTTP/1.1\r\nUser-Agent: %s\r\nHost: %s:%s\r\nConnection: %s\r\n\r\n";
+	while(1){
+		sin_size=sizeof their_addr;
+		new_fd=accept(_sockfd,(struct sockaddr*)&their_addr,&sin_size);
+		if(new_fd==-1){
+			perror("accept");
+			continue;
+		}
+		inet_ntop(their_addr.ss_family,
+			get_in_addr((struct sockaddr*)&their_addr),
+			s,sizeof s);
+		if((numbytes=recv(new_fd,buf,MAXDATASIZE,0)) == -1){
+			perror("recv");
+			continue;
+		}
+		cout<<"debug first line: "<<buf<<endl;
+		char filename[200];
+		char dummy[200];
+		// sprintf(query,msg,filename,USERAGENT,_hostname.c_str(),_PORT,CONNECTIONTYPE);
+		sscanf(buf,client_msg,filename,dummy,dummy,dummy,dummy);
+		char file[200];
+		strcpy(file,"/Users/Frank/");
+		strcat(file,filename);
+		cout<<"filename: "<<file<<endl;
+		// char *message_to_send=generate_response(filename);
+		if (!fork()) 
+		{ // this is the child process
+			close(_sockfd); // child doesn't need the listener
+			int file_size=0;
+
+			char info[30];
+			char buf[BUFFER_SIZE];
+			std::ifstream fin(file,std::ios_base::in);
+			if(fin.is_open()){
+				char sizemsg[200];
+				strcpy(info,"200");
+				struct stat st;
+				stat(file,&st);
+				file_size=st.st_size;
+				sprintf(sizemsg, "%d", file_size);
+				int file_size_left=file_size;
+				char response[BUFFER_SIZE];
+				sprintf(response, server_response_msg, info, filename,sizemsg);
+
+				if(send(new_fd,response,BUFFER_SIZE,0)<0){
+					perror("cannot send");
+					exit(1);
+				}
+				while(fin){
+					fin.read(buf,BUFFER_SIZE);
+					int cur_send=send(new_fd,buf,std::min(BUFFER_SIZE,file_size_left),0);
+					cout<<"send buf: "<<cur_send<<endl;
+					if(cur_send<0){
+						perror("cannot send");
+						exit(1);
+					}
+					file_size_left-=cur_send;
+				}
+
+			}
+			else{
+				perror("cannot open the file...\n");
+				strcpy(info,"404");
+				char response[BUFFER_SIZE];
+				sprintf(response, server_response_msg, info,filename,"0");
+				if(send(new_fd,response,BUFFER_SIZE,0)<0){
+					perror("cannot send");
+					exit(1);
+				}
+			}
+			close(new_fd);
+			exit(0);
+		}
+		// delete message_to_send;
+		// free(message_to_send);
+		close(new_fd);
+	}
+		
+
+}
+
 void network::disconnect(){
 	int fd=_sockfd;
 	this->_sockfd=-1;
@@ -369,24 +499,6 @@ bool network::send_msg(msg_t type){
 		return false;
 	}
 	return true;
-}
-
-msg_t network_client::recv_msg(){
-	msg_t msgtype;
-	if(recv(_sockfd,&msgtype,sizeof (msg_t),0)<=0){
-		perror("receive type fail");
-		return msg_t::TIMEOUT;
-	}
-	return msgtype;
-}
-
-msg_t network_server::recv_msg(int nwesockfd){
-	msg_t msgtype;
-	if(recv(nwesockfd,&msgtype,sizeof (msg_t),0)<=0){
-		perror("receive type fail");
-		return msg_t::TIMEOUT;
-	}
-	return msgtype;
 }
 
 int network::get_fd(){

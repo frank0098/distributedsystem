@@ -40,6 +40,7 @@ membership::membership(){
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 	_dts=new detector_sender(&(this->_members),this->_am,this->_logger);
 	_sc=new service(this->_logger,_sv->get_nw());
+	_fs=new file_server(this->_logger,_am);
 
 
 }
@@ -52,6 +53,7 @@ void membership::start(){
 	_ell->start();
 	_dt->start();
 	_dts->start();
+	_fs->start();
 	while(true){
 		stop_flag.lock();
 		if(stop_flag.is_true()){
@@ -65,6 +67,7 @@ void membership::start(){
 
 membership::~membership(){
 	cout<<"end membership"<<endl;
+	_fs->join();
 	_sv->join();
 	_logger->join();
 	_dt->join();
@@ -73,6 +76,7 @@ membership::~membership(){
 	_dts->join();
 	_sc->join();
 	cout<<"join finished"<<endl;
+	delete _fs;
 	delete _sc;
 	delete _sv;
 	delete _logger;
