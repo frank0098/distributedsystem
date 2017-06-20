@@ -456,6 +456,28 @@ bool network_client::file_server_client(char* filename,char* request_type) {
         cout<<buf<<endl;
     	if(strcmp(info,"200")!=0) return false;
     }
+    else if(strcmp(request_type,"LS")==0){
+    	sprintf(query,client_msg,request_type,filename,USERAGENT,(_hostname+":"+_PORT).c_str(),CONNECTIONTYPE,"0");
+    	if((send(_sockfd,query,BUFFER_SIZE,0))<0) {
+            perror("cannot send query");
+            return false;
+        }
+        if(recv(_sockfd,buf,BUFFER_SIZE,0)==-1) {
+            perror("recv");
+            return false;
+        }
+        sscanf(buf, server_response_msg, info,filename,file_size);
+    	if(strcmp(info,"200")!=0) return false;
+    	int file_size_number=atoi(file_size);
+    	char res[file_size_number+1];
+    	if(recv(_sockfd,res,file_size_number,0)==-1){
+    		perror("recv");
+    		return false;
+    	}
+    	res[file_size_number]='\0';
+    	cout<<res<<endl;
+
+    }
 
     return true;
 }
@@ -599,9 +621,41 @@ void network_server::serve_forever() {
                         exit(1);
                 }
             }
-            // else if(strcmp(request_type,"LS")==0){
+            else if(strcmp(request_type,"LS")==0){
+            	DIR *dir;
+            	struct dirent* ent;
+            	char path_name[100];
+            	strcpy(path_name,homedir);
+            	strcat(path_name,"/dfs/");
+            	string folder_files="";
+            	if((dir=opendir(path_name))!=nullptr){
+            		while((ent=readdir(dir))!=nullptr){
+            			string fname=string(ent->d_name);
+            			if(fname!="." and fname !=".."){
+            				folder_files+=string(ent->d_name);
+            				folder_files+="\t";
+            			}
+            			
+            		}
+            		closedir(dir);
+            		strcpy(info,"200");
+            	}
+            	else{
+            		_lg->add_write_log_task("Fail to open folder ~/dfs");
+            		strcpy(info,"200");
+            	}
+            	cout<<"folder file "<<folder_files<<endl;
+            	sprintf(response, server_response_msg, info,filename,to_string(folder_files.size()).c_str());
+            	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
+                        perror("cannot send");
+                        exit(1);
+                }
+            	if(send(new_fd,folder_files.c_str(),folder_files.size(),0)<0){
+            		perror("cannot send");
+            		exit(1);
+            	}
 
-            // }
+            }
             // else if(strcmp(request_type,"STORE")==0){
 
             // }

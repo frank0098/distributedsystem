@@ -26,6 +26,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#include <dirent.h>
 #include "logger.h"
 
 #define MAXDATASIZE 1000

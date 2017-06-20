@@ -21,7 +21,7 @@ int main(int argc,char ** argv){
 	}
 	network_client* nw=new network_client("127.0.0.1",FILE_SERVER_PORT);
 	nw->connect();
-	if(nw->file_server_client(argv[1],"DELETE")){
+	if(nw->file_server_client(argv[1],"LS")){
 		cout<<"file download complete: "<<argv[1]<<endl;
 	}
 	else{
