@@ -15,6 +15,7 @@
 #include <list>
 
 #include "network.h"
+#include "logger.h"
 
 bool check_valid_ip(const char* ip){
 	struct sockaddr_in sa;

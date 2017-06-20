@@ -26,8 +26,10 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <libgen.h>
+#include "logger.h"
+
 #define MAXDATASIZE 1000
-#define USERAGENT "Wget/1.12 (linux-gnu)"
+#define USERAGENT "Wget/1.12(linux-gnu)"
 #define CONNECTIONTYPE "Keep-Alive"
 
 enum msg_t {
@@ -63,6 +65,7 @@ enum msg_t {
 class network{
 public:
 	network(std::string hostname);
+	network(std::string hostname,loggerThread* lg);
 	virtual void connect()=0;
 	bool send_msg(msg_t type);
 	int get_fd();
@@ -74,11 +77,12 @@ protected:
 	std::string _hostname;
 	int _sockfd;
 	const char* _PORT;
+	loggerThread* _lg;
 };
 
 class network_server:public network{
 public:
-	network_server(const char* port);
+	network_server(const char* port,loggerThread* lg);
 	void connect() override;
 	void serve_forever();
 	// static bool server_send(int sockfd,msg_t msgtype);
@@ -90,7 +94,7 @@ class network_client:public network{
 public:
 	network_client(std::string hostname,const char* port);
 	void connect() override;
-	bool file_server_client(char* filename);
+	bool file_server_client(char* filename,char* request_type);
 	msg_t recv_msg();
 };
 

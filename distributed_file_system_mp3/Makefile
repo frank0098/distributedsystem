@@ -4,9 +4,9 @@ CFLAGS=-c -Wall -std=c++11
 
 OBJECTS= main.o membership.o server.o detector.o network.o logger.o thread.o member.o service.o workQueue.o detector_sender.o election_listener.o election.o file_server.o
 
-REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o
+REMOTECONTROLLER_OBJECTS= remotecontroller.o network.o logger.o thread.o
 
-DFS_CLIENT_OBJECTS=dfs_client.o network.o
+DFS_CLIENT_OBJECTS=dfs_client.o network.o logger.o thread.o
 
 .PHONY: all clean
 
@@ -54,7 +54,7 @@ server.o: server.cpp server.h network.h logger.h thread.h member.h
 service.o: service.cpp network.h logger.h thread.h
 	$(CC) $(CFLAGS) service.cpp
 
-network.o: network.cpp network.h
+network.o: network.cpp network.h logger.h
 	$(CC) $(CFLAGS) network.cpp
 
 logger.o: logger.cpp logger.h workQueue.h
