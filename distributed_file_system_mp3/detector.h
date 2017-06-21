@@ -19,7 +19,7 @@ private:
 
 	std::list<std::string> *_members;
 	alive_member *_am;
-	loggerThread* _logger;
+	loggerThread* _lg;
 	network_udp *_nw;
 };
 
@@ -31,7 +31,7 @@ public:
 private:
 	std::list<std::string> *_members;
 	alive_member *_am;
-	loggerThread* _logger;
+	loggerThread* _lg;
 	// network_udp *_nw;
 };
 

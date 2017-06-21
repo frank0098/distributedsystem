@@ -1,10 +1,10 @@
 #include "detector.h"
 
-detector_sender::detector_sender(std::list<string> *mem, alive_member *am,loggerThread *lg):_members(mem),_am(am),_logger(lg){
-	_logger->add_write_log_task("detector sender start");
+detector_sender::detector_sender(std::list<string> *mem, alive_member *am,loggerThread *lg):_members(mem),_am(am),_lg(lg){
+	_lg->add_write_log_task("detector sender start");
 }
 detector_sender::~detector_sender(){
-	_logger->add_write_log_task("detector sender ends");
+	_lg->add_write_log_task("detector sender ends");
 }	
 
 void* detector_sender::run(){
@@ -39,12 +39,12 @@ void* detector_sender::run(){
 		detector_stop_flag.cond_signal();
 		detector_stop_flag.unlock();
 		// cout<<"running : current state: "<<ds<<endl;
-		// _logger->add_write_log_task("running : detector_sendor current state: "+to_string((int)ds));
+		// _lg->add_write_log_task("running : detector_sendor current state: "+to_string((int)ds));
 		if(ds==detector_state::START_PHASE){
 			for(auto m:*_members){
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN,m.c_str());
 			if(!network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,m.c_str())){
-				_logger->add_write_log_task("Detector: FATAL ERROR TO CONNECT "+m);
+				_lg->add_write_log_task("Detector: FATAL ERROR TO CONNECT "+m);
 				continue;
 				}
 			}

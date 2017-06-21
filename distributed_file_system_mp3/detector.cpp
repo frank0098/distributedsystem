@@ -6,15 +6,15 @@ detector_state ds=detector_state::START_PHASE;
 std::vector<std::string> suspicious_dead_members;
 
 
-detector::detector(std::list<string> *mem, alive_member *am,loggerThread *lg):_members(mem),_am(am),_logger(lg){
-	_logger->add_write_log_task("detector start");
+detector::detector(std::list<string> *mem, alive_member *am,loggerThread *lg):_members(mem),_am(am),_lg(lg){
+	_lg->add_write_log_task("detector start");
 	_nw=new network_udp(DETECTORPORT,true);
 	_nw->connect();
 }
 detector::~detector(){
 	_nw->disconnect();
 	delete _nw;
-	_logger->add_write_log_task("detector ends");
+	_lg->add_write_log_task("detector ends");
 	// cout<<"END DETECTOR"<<endl;
 }	
 void* detector::run(){
@@ -28,7 +28,7 @@ void* detector::run(){
 	char msg_send_buffer[BUFFER_SIZE];
 	while(true){
 
-		// _logger->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
+		// _lg->add_write_log_task("DETECTOR DEBUG machine id : "+std::to_string(machine_id) + " highest_id: "+std::to_string(highest_id));
 		stop_flag.lock();
 		if(stop_flag.is_true()){
 			stop_flag.unlock();
@@ -53,7 +53,7 @@ void* detector::run(){
 		msg_receive_buffer[0]='\0';
 		additional_ip_received[0]='\0';
 
-		// _logger->add_write_log_task("running : detector current state: "+to_string((int)ds));
+		// _lg->add_write_log_task("running : detector current state: "+to_string((int)ds));
 
 		if(ds==detector_state::START_PHASE){
 
@@ -63,14 +63,15 @@ void* detector::run(){
 					msg_type=network_udp::get_response(msg_receive_buffer,additional_ip_received);
 				}
 
-				_logger->add_write_log_task("Detector: Recv msgtype "+to_string(msg_type)+" from "+string(source));
+				_lg->add_write_log_task("Detector: Recv msgtype "+to_string(msg_type)+" from "+string(source));
+				_lg->add_write_log_task("Detector "+string(msg_receive_buffer)+" "+string(additional_ip_received));
 				if(msg_type==msg_t::JOIN_SUCCESS){
 					if(_am->add(string(source))){
-							_logger->add_write_log_task("Detector: Add "+string(source)+" to membership list");
-							_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+							_lg->add_write_log_task("Detector: Add "+string(source)+" to membership list");
+							_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 					}
 					else{
-						_logger->add_write_log_task("Detector: "+string(source)+" already in the membership list");
+						_lg->add_write_log_task("Detector: "+string(source)+" already in the membership list");
 					}
 					ds=detector_state::PING_ACK_PHASE;
 
@@ -96,7 +97,7 @@ void* detector::run(){
 					    suspicious_dead_members.erase(it);
 				}
 				else{
-					_logger->add_write_log_task("Detector: recv msg: "+to_string(msg_type));
+					_lg->add_write_log_task("Detector: recv msg: "+to_string(msg_type));
 				}
 				i++;
 			}
@@ -107,7 +108,7 @@ void* detector::run(){
 					sus_mem+=m;
 					sus_mem+=" ";
 				}
-				_logger->add_write_log_task("Detector: suspect dead members: "+sus_mem);
+				_lg->add_write_log_task("Detector: suspect dead members: "+sus_mem);
 
 			}
 
@@ -125,8 +126,8 @@ void* detector::run(){
 			}
 			for(auto m:suspicious_dead_members){
 				_am->remove(m);
-				_logger->add_write_log_task("Detector: remove "+m+" from membership list");
-				_logger->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+				_lg->add_write_log_task("Detector: remove "+m+" from membership list");
+				_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
 				if(m==coordinator){
 					election_stop_flag.lock();
 					election_listener_stop_flag.lock();
