@@ -49,6 +49,7 @@ void* server::run(){
 			}
 			else{
 				_lg->add_write_log_task("Server: "+string(source)+" already in the membership list");
+				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			}
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN_SUCCESS,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
@@ -125,7 +126,7 @@ void* server::run(){
 		// 	network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,CLIENT_PORT,source);	
 		// }
 		// else if(msg_type==msg_t::GET_FILE_ADDR){
-			
+
 		// }
 		// cout<<"server send "<<response_type<<endl;
 		// #if DEBUG
