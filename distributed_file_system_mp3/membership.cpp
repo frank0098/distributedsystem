@@ -49,11 +49,11 @@ void membership::start(){
 	_sc->start();
 	_sv->start();
 	_logger->start();
-	// _el->start();
-	// _ell->start();
+	_el->start();
+	_ell->start();
 	_dt->start();
 	_dts->start();
-	// _fs->start();
+	_fs->start();
 	while(true){
 		stop_flag.lock();
 		if(stop_flag.is_true()){
