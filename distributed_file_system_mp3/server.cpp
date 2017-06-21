@@ -120,7 +120,13 @@ void* server::run(){
 			_lg->add_write_log_task("SERVER coordinator: "+coordinator);
 
 		}
-
+		else if(msg_type==msg_t::GET_COORDINATOR){
+			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,coordinator.c_str());
+			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,CLIENT_PORT,source);	
+		}
+		else if(msg_type==msg_t::GET_FILE_ADDR){
+			
+		}
 		// cout<<"server send "<<response_type<<endl;
 		// #if DEBUG
 		// _lg->add_write_log_task("SERVER:  send ACK to "+string(source));
