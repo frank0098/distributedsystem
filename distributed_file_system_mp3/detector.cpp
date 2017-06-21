@@ -72,6 +72,7 @@ void* detector::run(){
 					}
 					else{
 						_lg->add_write_log_task("Detector: "+string(source)+" already in the membership list");
+						_lg->add_write_log_task("Detector: motherfucker current members: "+_am->get_alive_member_list());
 					}
 					ds=detector_state::PING_ACK_PHASE;
 
