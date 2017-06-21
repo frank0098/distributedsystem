@@ -1,7 +1,7 @@
 #include "election.h"
 
 election_listener::election_listener(loggerThread* lg,alive_member *am):_lg(lg),_am(am){
-	_lg->add_write_log_task("election start");
+	_lg->add_write_log_task("election listener start");
 	_nw=new network_udp(ELECTIONPORT,true);
 	_nw->connect();
 	election_listener_stop_flag.lock();
@@ -11,7 +11,7 @@ election_listener::election_listener(loggerThread* lg,alive_member *am):_lg(lg),
 election_listener::~election_listener(){
 	_nw->disconnect();
 	delete _nw;
-	_lg->add_write_log_task("election ends");
+	_lg->add_write_log_task("election listener ends");
 }
 
 void* election_listener::run(){

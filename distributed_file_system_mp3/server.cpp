@@ -22,7 +22,7 @@ void* server::run(){
 			break;
 		}
 		stop_flag.unlock();
-		// _lg->add_write_log_task("SERVER: coordinator: "+coordinator);
+		_lg->add_write_log_task("SERVER: coordinator: "+coordinator);
 		// _lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 		pause_flag.lock();
 		while(pause_flag.is_true()){
@@ -89,7 +89,7 @@ void* server::run(){
 			char tmp_ip_addr[INET6_ADDRSTRLEN];
 			_am->remove(string(additional_ip_received));
 			_lg->add_write_log_task("SERVER: Receive FAIL from "+ string(source)+": Remove "+string(additional_ip_received)+" From membership list.");
-			_lg->add_write_log_task("Detector: current members: "+_am->get_alive_member_list());
+			_lg->add_write_log_task("SERVER: current members: "+_am->get_alive_member_list());
 			network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);	
 		}
