@@ -13,13 +13,13 @@ DFS_CLIENT_OBJECTS=dfs_client.o network.o logger.o thread.o
 all: dfs remotecontroller client
 
 remotecontroller: remotecontroller.o
-	$(CC) $(REMOTECONTROLLER_OBJECTS) -o remotecontroller.out
+	$(CC) $(REMOTECONTROLLER_OBJECTS) -pthread -o remotecontroller.out
 
 dfs:$(OBJECTS)
 	$(CC) $(OBJECTS) $(DEBUG) -pthread -o dfs.out
 
 client: dfs_client.o
-	$(CC) $(DFS_CLIENT_OBJECTS) -o client.out
+	$(CC) $(DFS_CLIENT_OBJECTS) -pthread -o client.out
 
 dfs_client.o: dfs_client.cpp network.h
 	$(CC) $(CFLAGS) dfs_client.cpp
