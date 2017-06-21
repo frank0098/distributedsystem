@@ -22,8 +22,8 @@ void* server::run(){
 			break;
 		}
 		stop_flag.unlock();
-		_lg->add_write_log_task("SERVER: coordinator: "+coordinator);
-		_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+		// _lg->add_write_log_task("SERVER: coordinator: "+coordinator);
+		// _lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 		pause_flag.lock();
 		while(pause_flag.is_true()){
 			pause_flag.cond_wait();
@@ -45,11 +45,11 @@ void* server::run(){
 		if(msg_type==msg_t::JOIN){
 			if(_am->add(string(source))){
 				_lg->add_write_log_task("Server: receive JOIN, Add "+string(source)+" to membership list");
-				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list()+"\n coordinator: "+coordinator);
 			}
 			else{
 				_lg->add_write_log_task("Server: "+string(source)+" already in the membership list");
-				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list()+"\n coordinator: "+coordinator);
 			}
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN_SUCCESS,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
@@ -57,16 +57,16 @@ void* server::run(){
 		else if(msg_type==msg_t::EXIT){
 			_am->remove(string(source));
 			_lg->add_write_log_task("Server: Receive EXIT: Remove "+string(source)+" From membership list.");
-			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
+			_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list()+"\n coordinator: "+coordinator);
 			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
 
 		}
 		else if(msg_type==msg_t::PING){
-			if(!_am->exists(string(source))){
-				_am->add(string(source));
-				_lg->add_write_log_task("Server: REJOIN Add "+string(source)+" to membership list");
-			}
+			// if(!_am->exists(string(source))){
+			// 	_am->add(string(source));
+			// 	_lg->add_write_log_task("Server: REJOIN Add "+string(source)+" to membership list");
+			// }
 			// _lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			network_udp::generate_msg(msg_send_buffer,msg_t::ACK,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
@@ -89,7 +89,7 @@ void* server::run(){
 			char tmp_ip_addr[INET6_ADDRSTRLEN];
 			_am->remove(string(additional_ip_received));
 			_lg->add_write_log_task("SERVER: Receive FAIL from "+ string(source)+": Remove "+string(additional_ip_received)+" From membership list.");
-			_lg->add_write_log_task("SERVER: current members: "+_am->get_alive_member_list());
+			_lg->add_write_log_task("SERVER: current members: "+_am->get_alive_member_list()+"\n coordinator: "+coordinator);
 			network_udp::generate_msg(msg_send_buffer,msg_t::FAIL,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);	
 		}
