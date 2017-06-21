@@ -64,7 +64,6 @@ void* detector::run(){
 				}
 
 				_lg->add_write_log_task("Detector: Recv msgtype "+to_string(msg_type)+" from "+string(source));
-				_lg->add_write_log_task("Detector "+string(msg_receive_buffer)+" "+string(additional_ip_received));
 				if(msg_type==msg_t::JOIN_SUCCESS){
 					if(_am->add(string(source))){
 							_lg->add_write_log_task("Detector: Add "+string(source)+" to membership list");
@@ -72,7 +71,7 @@ void* detector::run(){
 					}
 					else{
 						_lg->add_write_log_task("Detector: "+string(source)+" already in the membership list");
-						_lg->add_write_log_task("Detector: motherfucker current members: "+_am->get_alive_member_list());
+						_lg->add_write_log_task("Detector:  current members: "+_am->get_alive_member_list());
 					}
 					ds=detector_state::PING_ACK_PHASE;
 

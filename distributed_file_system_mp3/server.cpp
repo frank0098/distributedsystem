@@ -48,8 +48,8 @@ void* server::run(){
 				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			}
 			else{
-				_lg->add_write_log_task("Server qnmlgbsadfsd: "+string(source)+" already in the membership list");
-				_lg->add_write_log_task("Server: motherfucker current members: "+_am->get_alive_member_list());
+				_lg->add_write_log_task("Server: "+string(source)+" already in the membership list");
+				_lg->add_write_log_task("Server: current members: "+_am->get_alive_member_list());
 			}
 			network_udp::generate_msg(msg_send_buffer,msg_t::JOIN_SUCCESS,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,source);
