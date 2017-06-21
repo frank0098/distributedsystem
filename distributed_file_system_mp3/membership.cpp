@@ -35,12 +35,12 @@ membership::membership(){
 	
 	_am=new alive_member();
 	_sv=new server(this->_logger,_am);
-	_el=new election(this->_logger,_am);
-	_ell=new election_listener(this->_logger,_am);
+	// _el=new election(this->_logger,_am);
+	// _ell=new election_listener(this->_logger,_am);
 	_dt=new detector(&(this->_members),this->_am,this->_logger);
 	_dts=new detector_sender(&(this->_members),this->_am,this->_logger);
 	_sc=new service(this->_logger,_sv->get_nw());
-	_fs=new file_server(this->_logger,_am);
+	// _fs=new file_server(this->_logger,_am);
 
 
 }
