@@ -5,15 +5,21 @@
 #include "logger.h"
 #include "member.h"
 #include <arpa/inet.h>
+#include <unordered_map>
+#include <cstdlib> 
+#include <ctime> 
+
+#define DUPLICATE_COUNT 3
 class file_server:public Thread{
 public:
 	file_server(loggerThread *lg,alive_member *am);
-	~file_server();
+	virtual ~file_server();
 	void* run();
 private:
 	loggerThread* _lg;
 	network_server* _nw;
 	alive_member *_am;
+	std::unordered_map<std::string,std::vector<string> > file_addr_map;
 
 
 };

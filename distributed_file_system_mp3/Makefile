@@ -54,7 +54,7 @@ server.o: server.cpp server.h network.h logger.h thread.h member.h
 service.o: service.cpp network.h logger.h thread.h
 	$(CC) $(CFLAGS) service.cpp
 
-network.o: network.cpp network.h logger.h
+network.o: network.cpp network.h logger.h member.h
 	$(CC) $(CFLAGS) network.cpp
 
 logger.o: logger.cpp logger.h workQueue.h

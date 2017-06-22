@@ -6,11 +6,8 @@
 #include "member.h"
 
 #include <arpa/inet.h>
-#include <unordered_map>
 #include <vector>
 #include <string>
-#include <cstdlib> 
-#include <ctime> 
 #include <iostream>
 
 class server:public Thread{
@@ -23,7 +20,7 @@ private:
 	loggerThread* _lg;
 	network_udp* _nw;
 	alive_member *_am;
-	std::unordered_map<std::string,std::vector<string> > file_addr_map;
+	// std::unordered_map<std::string,std::vector<string> > *file_addr_map;
 
 
 

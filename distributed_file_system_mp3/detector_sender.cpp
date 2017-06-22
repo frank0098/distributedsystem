@@ -59,7 +59,7 @@ void* detector_sender::run(){
 		}
 		else if(ds==detector_state::SUSPICIOUS){
 			for(auto m:suspicious_dead_members){
-				std::vector<std::string> other_machines=alive_member::random_select_K(2,m,_am->get_alive_member());
+				std::vector<std::string> other_machines=alive_member::random_select_K(2,_am->get_alive_member());
 				if(other_machines.size()==0) continue;
 				for(auto om:other_machines){
 					network_udp::generate_msg(msg_send_buffer,msg_t::QUERY,m.c_str());

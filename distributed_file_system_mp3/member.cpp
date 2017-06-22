@@ -65,7 +65,7 @@ std::vector<std::string> alive_member::get_alive_member(){
 	return ret;
 }
 
-std::vector<std::string> alive_member::random_select_K(size_t K,std::string self,std::vector<std::string> v){
+std::vector<std::string> alive_member::random_select_K(size_t K,std::vector<std::string> v){
 	if(K>=v.size()) return v;
 	std::vector<std::string> reservoir(K);
 	srand(time(NULL));

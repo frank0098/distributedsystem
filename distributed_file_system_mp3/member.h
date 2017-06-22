@@ -30,7 +30,7 @@ class alive_member{
 public:
 	bool add(std::string ip);
 	void remove(std::string ip);
-	static std::vector<std::string> random_select_K(size_t K,std::string self,std::vector<std::string> v);
+	static std::vector<std::string> random_select_K(size_t K,std::vector<std::string> v);
 	std::vector<std::string> get_alive_member();
 	std::vector<machine_info> get_alive_member_with_id();
 	std::string get_alive_member_list();

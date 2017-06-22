@@ -27,7 +27,9 @@
 #include <sys/stat.h>
 #include <libgen.h>
 #include <dirent.h>
+#include <unordered_map>
 #include "logger.h"
+#include "member.h"
 
 #define MAXDATASIZE 1000
 #define USERAGENT "Wget/1.12(linux-gnu)"
@@ -87,7 +89,7 @@ class network_server:public network{
 public:
 	network_server(const char* port,loggerThread* lg);
 	void connect() override;
-	void serve_forever();
+	void serve_forever(alive_member* am,std::unordered_map<std::string,std::vector<string> > *file_addr_map);
 	// static bool server_send(int sockfd,msg_t msgtype);
 	// static msg_t recv_msg(int sockfd);
 
@@ -116,6 +118,8 @@ private:
 
 };
 
+extern const char *server_response_msg;
+extern const char *client_msg;
 
 extern void *get_in_addr(struct sockaddr *sa);
 using std::cout;
