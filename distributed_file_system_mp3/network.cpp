@@ -511,14 +511,14 @@ void network_server::serve_forever() {
         char requested_file_size[30];
         sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size);
         if(_lg) {
-            _lg->add_write_log_task("Server recv "+string(request_type)+"type filename: "+filename);
+            _lg->add_write_log_task("Server recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
         }
 
         char file[200];
         strcpy(file,homedir);
         strcat(file,"/dfs/");
         strcat(file,filename);
-        cout<<"filename: "<<file<<endl;
+        // cout<<"filename: "<<file<<endl;
 
         if (!fork())
         {   // this is the child process

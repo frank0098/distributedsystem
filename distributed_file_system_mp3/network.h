@@ -51,7 +51,8 @@ enum msg_t {
 	JOIN_SUCCESS='o',
 	ELECTION='p',
 	ELECTION_OK='q',
-	COORDINATOR='r'
+	COORDINATOR='r',
+	GET_COORDINATOR='s',
 
 };
 #define PORT "5000"
@@ -60,6 +61,7 @@ enum msg_t {
 #define SERVICEPORT "5003"
 #define ELECTIONPORT "5004"
 #define FILE_SERVER_PORT "5005"
+#define CLIENT_PORT "6000"
 #define BACKLOG 10
 #define BUFFER_SIZE 300
 
