@@ -82,11 +82,12 @@ void* server::run(){
 			}
 		}
 		else if(msg_type==msg_t::INDIRECT_PING){
+
 			network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_ACK,additional_info_received);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,source);
 		}
 		else if(msg_type==msg_t::INDIRECT_ACK){
-
+			if(string(source)==query_ip) query_ip="";
 			network_udp::generate_msg(msg_send_buffer,msg_t::QUERY_SUCCESS,source);
 			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,DETECTORPORT,additional_info_received);
 		}
