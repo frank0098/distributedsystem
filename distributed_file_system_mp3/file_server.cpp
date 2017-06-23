@@ -205,21 +205,23 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
                         exit(1);
                 }
             }
-            else if(strcmp(request_type,"LIST_ALL_SERVER")==0){
-            	string tmp="";
-            	for(auto x:am->get_alive_member()){
-            		tmp+=x;
-            		tmp+="\t";
-            	}
-            	char resp[BUFFER_SIZE];
-            	resp[0]='\0';
-            	strcpy(resp,tmp.c_str());
-            	if(send(new_fd,resp,BUFFER_SIZE,0)<0){
-            		perror("cannot send");
-            		exit(1);
-            	}
 
-            }
+            // else if(strcmp(request_type,"LIST_ALL_SERVER")==0){
+            // 	string tmp="";
+            // 	for(auto x:am->get_alive_member()){
+            // 		tmp+=x;
+            // 		tmp+="\t";
+            // 	}
+            // 	char resp[BUFFER_SIZE];
+            // 	resp[0]='\0';
+            // 	strcpy(resp,tmp.c_str());
+            // 	if(send(new_fd,resp,BUFFER_SIZE,0)<0){
+            // 		perror("cannot send");
+            // 		exit(1);
+            // 	}
+
+            // }
+
             else if(strcmp(request_type,"GET_FILE_ADDR_ONE")==0){
             	int rnd = rand()%3; 
 	    		string fn=string(filename);
@@ -259,6 +261,21 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
                 }
 
             }
+			else if(strcmp(request_type,"LIST_ALL_FILES")==0){
+            	char resp[BUFFER_SIZE];
+            	resp[0]='\0';
+            	string tmp_str;
+            	for(auto it=file_addr_map->begin();it!=file_addr_map->end();++it){
+            		tmp_str+=it->first;
+            		tmp_str+="\t";
+            	}
+            	strcpy(resp,tmp_str.c_str());
+            	if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
+                        perror("cannot send");
+                        exit(1);
+                }
+            }
+
             else if(strcmp(request_type,"REQUEST_POST_FILE")==0){
             	string fn=string(filename);
             	char resp[BUFFER_SIZE];
@@ -298,7 +315,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	string ip_addrs=string(info);
             	size_t prev_loc=0;
             	for(size_t i=0;i<ip_addrs.size();++i){
-            		if(ip_addrs[i]=='/'){
+            		if(ip_addrs[i]=='\t'){
             			v.push_back(ip_addrs.substr(prev_loc,i-prev_loc));
             			prev_loc=i+1;
             		}

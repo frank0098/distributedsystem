@@ -72,6 +72,7 @@ public:
 	network(std::string hostname);
 	network(std::string hostname,loggerThread* lg);
 	virtual void connect()=0;
+	virtual ~network();
 	bool send_msg(msg_t type);
 	int get_fd();
 	bool is_connected();
@@ -99,7 +100,7 @@ class network_client:public network{
 public:
 	network_client(std::string hostname,const char* port);
 	void connect() override;
-	bool file_server_client(char* filename,char* request_type);
+	bool file_server_client(char* filename,const char* request_type, char* msg);
 	msg_t recv_msg();
 };
 

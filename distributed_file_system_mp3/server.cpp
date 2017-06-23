@@ -1,7 +1,6 @@
 #include "server.h"
 server::server(loggerThread* lg,alive_member* am):_lg(lg),_am(am){
 
-	srand((unsigned)time(0)); 
 	_lg->add_write_log_task("server start");
 	_nw=new network_udp(SERVERPORT,false);
 	_nw->connect();
@@ -17,6 +16,7 @@ network_udp* server::get_nw(){
 }
 
 void* server::run(){
+	string query_ip="";
 	while(true){
 		stop_flag.lock();
 		if(stop_flag.is_true()){
@@ -75,8 +75,11 @@ void* server::run(){
 		}
 		else if(msg_type==msg_t::QUERY){
 			_lg->add_write_log_task("SERVER: receive QUERY from "+string(source)+" to ping "+additional_info_received);
-			network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_PING,source);
-			network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,additional_info_received);
+			if(string(additional_info_received)!=query_ip){
+				query_ip=string(additional_info_received);
+				network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_PING,source);
+				network_udp::send_msg(msg_send_buffer,BUFFER_SIZE,SERVERPORT,additional_info_received);
+			}
 		}
 		else if(msg_type==msg_t::INDIRECT_PING){
 			network_udp::generate_msg(msg_send_buffer,msg_t::INDIRECT_ACK,additional_info_received);
@@ -166,7 +169,7 @@ void* server::run(){
 
 		// }
 		// else if(msg_type==msg_t::LS_ALL_FILE){
-			
+
 		// }
 		// cout<<"server send "<<response_type<<endl;
 		// #if DEBUG

@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -std=c++11
+CFLAGS=-c -Wall -std=c++11 
 
 OBJECTS= main.o membership.o server.o detector.o network.o logger.o thread.o member.o service.o workQueue.o detector_sender.o election_listener.o election.o file_server.o
 

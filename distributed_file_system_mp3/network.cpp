@@ -6,6 +6,9 @@ const char *client_msg="%s %s HTTP/1.1\r\nUser-Agent: %s\r\nHost: %s\r\nConnecti
 network::network(std::string hostname):_connected(false),_hostname(hostname),_sockfd(-1) {
     _lg=nullptr;
 }
+network::~network(){
+    
+}
 
 network::network(std::string hostname,loggerThread* lg):_connected(false),_hostname(hostname),_sockfd(-1),_lg(lg) {
 
