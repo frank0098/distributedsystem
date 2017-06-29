@@ -1,0 +1,461 @@
+diff --git a/distributed_file_system_mp3/detector.h b/distributed_file_system_mp3/detector.h
+index ebbc74e..f2635ba 100644
+--- a/distributed_file_system_mp3/detector.h
++++ b/distributed_file_system_mp3/detector.h
+@@ -8,7 +8,7 @@
+ #include <string>
+ #include <algorithm>
+ 
+-#define DETECTOR_SLEEP_TIME_CONFIG 5
++#define DETECTOR_SLEEP_TIME_CONFIG 10
+ 
+ class detector:public Thread{
+ public:
+diff --git a/distributed_file_system_mp3/dfs_client.cpp b/distributed_file_system_mp3/dfs_client.cpp
+index fd2d43c..3946819 100644
+--- a/distributed_file_system_mp3/dfs_client.cpp
++++ b/distributed_file_system_mp3/dfs_client.cpp
+@@ -138,16 +138,20 @@ bool network_client::file_server_client(char* filename,const char* request_type,
+             perror("recv");
+             return false;
+         }
+-        sscanf(buf, server_response_msg, info,filename,file_size);
++        cout<<buf<<endl;
++        char dummy[30];
++        sscanf(buf, server_response_msg, info,dummy,file_size);
+     	if(strcmp(info,"200")!=0) return false;
+     	int file_size_number=atoi(file_size);
+-    	char res[file_size_number+1];
+-    	if(recv(_sockfd,res,file_size_number,0)==-1){
++    	cout<<file_size_number<<endl;
++    	// char res[file_size_number+1];
++    	if(recv(_sockfd,msg,file_size_number,0)==-1){
+     		perror("recv");
+     		return false;
+     	}
+-    	res[file_size_number]='\0';
+-    	cout<<res<<endl;
++    	msg[file_size_number]='\0';
++    	cout<<msg<<endl;
++    	// cout<<res<<endl;
+     }
+     else if(strcmp(request_type,"COORDINATOR")==0 || strcmp(request_type,"GET_FILE_ADDR_ONE")==0 
+     	|| strcmp(request_type,"GET_FILE_ADDR_ALL")==0 || strcmp(request_type,"REQUEST_POST_FILE")==0
+@@ -173,12 +177,14 @@ bool network_client::file_server_client(char* filename,const char* request_type,
+ }
+ 
+ void file_op(char* filename,char* request_type){
++
+ 	std::vector<string> members;
+ 	server_addr_read_config("server.cfg",members);
+ 	srand((unsigned)time(0)); 
+ 	int sze=members.size();
+ 	int rnd=rand()%sze;
+-	char coordinator[INET6_ADDRSTRLEN];
++	char coordinator[BUFFER_SIZE];
++	coordinator[0]='\0';
+ 	network_client* nw=nullptr;
+ 	for(int i=0;i<members.size();i++){
+ 		nw=new network_client(members[(i+rnd)%sze].c_str(),FILE_SERVER_PORT);
+@@ -186,24 +192,46 @@ void file_op(char* filename,char* request_type){
+ 		if(nw->file_server_client("","COORDINATOR",coordinator)==false){
+ 			nw->disconnect();
+ 			delete nw;
++			nw=nullptr;
+ 			continue;
+ 		}
+-		else break;
++		else{
++			nw->disconnect();
++			delete nw;
++			nw=nullptr;
++			break;
++		}
+ 
+ 	}
+-	if(nw!=nullptr){
+-		nw->disconnect();
+-		delete nw;
++	if(coordinator[0]=='\0'){
++		cout<<"fail to get coordinator";
++		exit(-1);
+ 	}
++	cout<<coordinator<<endl;
++	cout<<string(coordinator).substr(0,7)<<endl;
++	if(string(coordinator).substr(0,7)=="::ffff:"){
++		string tmp=string(coordinator).substr(7);
++		cout<<tmp<<endl;
++		strcpy(coordinator,tmp.c_str());
++	}
++	// if(nw!=nullptr){
++	// 	nw->disconnect();
++	// 	delete nw;
++	// }
++	// return;
+ 	if(strcmp(request_type,"GET")==0){
+ 		nw=new network_client(coordinator,FILE_SERVER_PORT);
+ 		nw->connect();
+-		char file_ip[INET6_ADDRSTRLEN];
++		char file_ip[BUFFER_SIZE];
++		file_ip[0]='\0';
+ 		if(nw->file_server_client("","GET_FILE_ADDR_ONE",file_ip)==false){
+ 			cout<<"GET_FILE_ADDR_ONE from coordinator "<<coordinator<<" for file"<<filename<<" FAIL!"<<endl;
+ 		}
+ 		nw->disconnect();
+ 		delete nw;
++		if(strcmp(file_ip,"404")==0){
++			cout<<"GET FAILED: "<<filename<<" NOT FOUND"<<endl;
++		}
+ 		nw=new network_client(file_ip,FILE_SERVER_PORT);
+ 		nw->connect();
+ 		if(nw->file_server_client(filename,"GET","")){
+@@ -221,14 +249,19 @@ void file_op(char* filename,char* request_type){
+ 		nw->connect();
+ 		char file_ip_addr[BUFFER_SIZE];
+ 		if(nw->file_server_client("","GET_FILE_ADDR_ALL",file_ip_addr)==false){
+-			cout<<"GET_FILE_ADDR_ALL from coordinator "<<coordinator<<" for file"<<filename<<" FAIL!"<<endl;
++			cout<<"GET_FILE_ADDR_ALL from coordinator "<<coordinator<<" for file"<<filename<<" The file does not exist!"<<endl;
+ 		}
+-		nw->disconnect();
+-		delete nw;
++		
++		cout<<file_ip_addr<<"fileipaddr"<<endl;
+ 		if(strcmp(file_ip_addr,"404")==0){
+-			if(nw->file_server_client("","REQUEST_POST_FILE",file_ip_addr)==false){
+-			cout<<"REQUEST_POST_FILE FAIL from coordinator "<<coordinator<<" from file"<<filename<<" FAIL!"<<endl;
++				if(nw->file_server_client("","REQUEST_POST_FILE",coordinator)==false){
++				cout<<"REQUEST_POST_FILE FAIL from coordinator "<<coordinator<<" for file"<<filename<<" FAIL!: "<<file_ip_addr<<endl;
++				nw->disconnect();
++				delete nw;
++				exit(1);
+ 			}
++		nw->disconnect();
++		delete nw;
+ 		string ip_addrs=string(file_ip_addr);
+ 		std::vector<string> v_ip;
+ 		int loc=0;
+@@ -298,7 +331,8 @@ void file_op(char* filename,char* request_type){
+ 			nw->connect();
+ 			char all_files[BUFFER_SIZE];
+ 			if(nw->file_server_client("","LS",all_files)){
+-				cout<<"Files in "<<m<<" :\n"<<all_files;
++				cout<<"wtf"<<endl;
++				cout<<"Files in "<<m<<" :"<<all_files;
+ 			}
+ 			else{
+ 				cout<<"Server "<<m<<" is unreachable"<<endl;
+@@ -315,19 +349,16 @@ void file_op(char* filename,char* request_type){
+ 
+ 
+ int main(int argc,char ** argv){
+-	if (argc!=3){
++	if (argc!=3 and argc!=2){
+ 		fprintf(stderr,"usage: ./client.out ops [filename] \n");
+ 	    exit(1);
+ 	}
+-	network_client* nw=new network_client("127.0.0.1",FILE_SERVER_PORT);
+-	nw->connect();
+-	// if(nw->file_server_client(argv[1],"LS")==true){
+-	// 	cout<<"file download complete: "<<argv[1]<<endl;
+-	// }
+-	// else{
+-	// 	cout<<"error"<<argv[1]<<endl;
+-	// }
+-	nw->disconnect();
+-	delete nw;
++	if(argc==2){
++
++		file_op("",argv[1]);
++	}
++	else{
++		file_op(argv[2],argv[1]);
++	}
+ 	return 0;
+ }
+\ No newline at end of file
+diff --git a/distributed_file_system_mp3/election.cpp b/distributed_file_system_mp3/election.cpp
+index e1245c5..26b9367 100644
+--- a/distributed_file_system_mp3/election.cpp
++++ b/distributed_file_system_mp3/election.cpp
+@@ -11,10 +11,12 @@ election::~election(){
+ }
+ 
+ void* election::run(){
++
+ 	char source[INET6_ADDRSTRLEN];
+ 	char msg_receive_buffer[BUFFER_SIZE];
+ 	char msg_send_buffer[BUFFER_SIZE];
+ 	while(true){
++		cout<<"election"<<endl;
+ 		_lg->add_write_log_task("Election ongoing");
+ 		stop_flag.lock();
+ 		if(stop_flag.is_true()){
+diff --git a/distributed_file_system_mp3/election_listener.cpp b/distributed_file_system_mp3/election_listener.cpp
+index f2d48dc..5dea54b 100644
+--- a/distributed_file_system_mp3/election_listener.cpp
++++ b/distributed_file_system_mp3/election_listener.cpp
+@@ -20,6 +20,8 @@ void* election_listener::run(){
+ 	char additional_ip_received[INET6_ADDRSTRLEN];
+ 	char msg_send_buffer[BUFFER_SIZE];
+ 	while(true){
++
++		cout<<"election listener"<<endl;
+ 		_lg->add_write_log_task("Election listner ongoing");
+ 		stop_flag.lock();
+ 		if(stop_flag.is_true()){
+diff --git a/distributed_file_system_mp3/file_server.cpp b/distributed_file_system_mp3/file_server.cpp
+index 581e2e5..80054db 100644
+--- a/distributed_file_system_mp3/file_server.cpp
++++ b/distributed_file_system_mp3/file_server.cpp
+@@ -50,7 +50,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+         char info[100];
+         sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size,info);
+         if(_lg) {
+-            _lg->add_write_log_task("Server recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
++            _lg->add_write_log_task("FileServer recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
+         }
+ 
+         char file[200];
+@@ -78,7 +78,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+                     sprintf(sizemsg, "%d", file_size);
+                     int file_size_left=file_size;
+                     sprintf(response, server_response_msg, info, filename,sizemsg);
+-
++                    string record="FileServer resp to "+string(s)+" :"+string(response);
++                    cout<<record<<endl;
+                     if(send(new_fd,response,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -112,6 +113,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+                 if(outfile.is_open()) {
+                     strcpy(info,"200");
+                     sprintf(response, server_response_msg, info, filename,requested_file_size);
++                    string record="FileServer resp to "+string(s)+" :"+string(response);
++                    cout<<record<<endl;
+                     if(send(new_fd,response,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -154,6 +157,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+             		strcpy(info,"404");
+             	}
+                 sprintf(response, server_response_msg, info,filename,"0");
++                string record="FileServer resp to "+string(s)+" :"+string(response);
++                cout<<record<<endl;
+             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -183,7 +188,10 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+             		strcpy(info,"200");
+             	}
+             	cout<<"folder file "<<folder_files<<endl;
++            	strcpy(filename,"/*--folder--*/");
+             	sprintf(response, server_response_msg, info,filename,to_string(folder_files.size()).c_str());
++                string record="FileServer resp to "+string(s)+" :"+string(response);
++                cout<<record<<endl;
+             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -200,28 +208,14 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+             	char cord[INET6_ADDRSTRLEN];
+             	cord[0]='\0';
+             	strcpy(cord,coordinator.c_str());
++                string record="FileServer resp to "+string(s)+" :"+string(cord);
++                cout<<record<<endl;
+             	if(send(new_fd,cord,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+                 }
+             }
+ 
+-            // else if(strcmp(request_type,"LIST_ALL_SERVER")==0){
+-            // 	string tmp="";
+-            // 	for(auto x:am->get_alive_member()){
+-            // 		tmp+=x;
+-            // 		tmp+="\t";
+-            // 	}
+-            // 	char resp[BUFFER_SIZE];
+-            // 	resp[0]='\0';
+-            // 	strcpy(resp,tmp.c_str());
+-            // 	if(send(new_fd,resp,BUFFER_SIZE,0)<0){
+-            // 		perror("cannot send");
+-            // 		exit(1);
+-            // 	}
+-
+-            // }
+-
+             else if(strcmp(request_type,"GET_FILE_ADDR_ONE")==0){
+             	int rnd = rand()%3; 
+ 	    		string fn=string(filename);
+@@ -233,6 +227,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+ 	    		else{
+ 	    			strcpy(file_addr,file_addr_map->at(fn)[rnd].c_str());
+ 	    		}
++                string record="FileServer resp to "+string(s)+" :"+string(file_addr);
++                cout<<record<<endl;
+ 	    		if(send(new_fd,file_addr,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -255,6 +251,9 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+ 					}
+ 					strcpy(resp,tmp_str.c_str());
+ 				}
++                string record="FileServer resp to "+string(s)+" :"+string(resp);
++                cout<<record<<endl;
++                 
+ 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -270,6 +269,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+             		tmp_str+="\t";
+             	}
+             	strcpy(resp,tmp_str.c_str());
++                string record="FileServer resp to "+string(s)+" :"+string(resp);
++                cout<<record<<endl;
+             	if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -303,6 +304,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+ 					}
+ 					strcpy(resp,tmp_str.c_str());
+ 				}
++                string record="FileServer resp to "+string(s)+" :"+string(resp);
++                cout<<record<<endl;
+ 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
+                         perror("cannot send");
+                         exit(1);
+@@ -321,10 +324,14 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
+             		}
+             	}
+             	file_addr_map->at(string(filename))=v;
++                string record="FileServer insert file entry: "+string(filename)+": "+ip_addrs;
++                cout<<record<<endl;
+ 
+             }
+             else if(strcmp(request_type,"DELETE_FILE_ENTRY")==0){
+             	file_addr_map->erase(string(filename));
++                 if(_lg)
++                        _lg->add_write_log_task("FileServer delete file entry: "+string(filename));
+             }
+ 
+ 
+diff --git a/distributed_file_system_mp3/member.cpp b/distributed_file_system_mp3/member.cpp
+index 7781449..e69de29 100644
+--- a/distributed_file_system_mp3/member.cpp
++++ b/distributed_file_system_mp3/member.cpp
+@@ -1,103 +0,0 @@
+-#include "member.h"
+-
+-
+-
+-std::string coordinator;
+-std::string machine_ip;
+-int machine_id=-1;
+-int highest_id=-1;
+-std::map<std::string,int> ip_mapping;
+-std::string failure_process;
+-
+-bool alive_member::add(std::string ip){
+-	// static int id_cnt=0;
+-	if(ip.empty()) return false;
+-	std::lock_guard<std::mutex> guard(mutex);
+-	highest_id=std::max(ip_mapping[ip],highest_id);
+-	if(ip_mapping[ip]==highest_id) coordinator=ip;
+-	for(auto x:_am){
+-		if(x.ip==ip) return false;
+-	}
+-	if(ip==machine_ip) machine_id=ip_mapping[ip];
+-	_am.push_back(machine_info(ip,ip_mapping[ip]));
+-
+-	return true;
+-}
+-
+-void alive_member::remove(std::string ip){
+-	std::lock_guard<std::mutex> guard(mutex);
+-	// auto it = std::find(_am.begin(), _am.end(), ip);
+-	for(auto it=_am.begin();it!=_am.end();++it){
+-		if((*it).ip==ip){
+-			if((*it).id==highest_id){
+-				int second_highest_id=-1;
+-				for(auto itt=_am.begin();itt!=_am.end();++itt){
+-					int curid=(*itt).id;
+-					if(curid>=second_highest_id &&  curid!=highest_id){
+-						second_highest_id=curid;
+-					}
+-				}
+-				highest_id=second_highest_id;
+-
+-			}
+-			
+-			_am.erase(it);
+-
+-			break;
+-		}
+-	}
+-}
+-
+-bool alive_member::exists(std::string ip){
+-	std::lock_guard<std::mutex> guard(mutex);
+-	for(auto x:_am){
+-		if(x.ip==ip) return true;
+-	}
+-	return false;
+-}
+-
+-std::vector<std::string> alive_member::get_alive_member(){
+-	std::lock_guard<std::mutex> guard(mutex);
+-	std::vector<std::string> ret;
+-	for(auto x:_am){
+-		ret.push_back(x.ip);
+-	}
+-	return ret;
+-}
+-
+-std::vector<std::string> alive_member::random_select_K(size_t K,std::vector<std::string> v){
+-	if(K>=v.size()) return v;
+-	std::vector<std::string> reservoir(K);
+-	srand(time(NULL));
+-	size_t i=0;
+-	for (size_t i = 0; i < K; i++)
+-        reservoir[i] = v[i];
+-    i=0;
+-	for(auto x:v){
+-		size_t j=rand()%(i+1);
+-		if(j<K){
+-			reservoir[j]=v[i];
+-		}
+-		i++;
+-	}
+-	return reservoir;
+-
+-}
+-std::string alive_member::get_alive_member_list(){
+-	std::lock_guard<std::mutex> guard(mutex);
+-	std::string ret;
+-	for(auto x:_am){
+-		ret+=x.ip;
+-		ret+=":";
+-		ret+=std::to_string(x.id);
+-		ret+=" ";
+-	}
+-	return ret;
+-}
+-
+-std::vector<machine_info> alive_member::get_alive_member_with_id(){
+-	std::lock_guard<std::mutex> guard(mutex);
+-	return _am;
+-}
+-
+- 
+\ No newline at end of file
+diff --git a/distributed_file_system_mp3/server.cfg b/distributed_file_system_mp3/server.cfg
+index cbe442f..e56ea71 100644
+--- a/distributed_file_system_mp3/server.cfg
++++ b/distributed_file_system_mp3/server.cfg
+@@ -1,4 +1 @@
+-35.185.91.83 
+-104.196.216.185
+-104.196.8.248
+-35.185.51.148
+\ No newline at end of file
++127.0.0.1
+\ No newline at end of file

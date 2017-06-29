@@ -39,6 +39,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
         inet_ntop(their_addr.ss_family,
                   get_in_addr((struct sockaddr*)&their_addr),
                   s,sizeof s);
+        buf[0]='\0';
         if((numbytes=recv(new_fd,buf,MAXDATASIZE,0)) == -1) {
             perror("recv");
             continue;
@@ -50,7 +51,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
         char info[100];
         sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size,info);
         if(_lg) {
-            _lg->add_write_log_task("Server recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
+            _lg->add_write_log_task("FileServer recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
         }
 
         char file[200];
@@ -78,7 +79,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
                     sprintf(sizemsg, "%d", file_size);
                     int file_size_left=file_size;
                     sprintf(response, server_response_msg, info, filename,sizemsg);
-
+                    string record="FileServer resp to "+string(s)+" :"+string(response);
+                    cout<<record<<endl;
                     if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -112,6 +114,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
                 if(outfile.is_open()) {
                     strcpy(info,"200");
                     sprintf(response, server_response_msg, info, filename,requested_file_size);
+                    string record="FileServer post resp to "+string(s)+" :"+string(response);
+                    cout<<record<<endl;
                     if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -154,6 +158,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             		strcpy(info,"404");
             	}
                 sprintf(response, server_response_msg, info,filename,"0");
+                string record="FileServer resp to "+string(s)+" :"+string(response);
+                cout<<record<<endl;
             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -183,7 +189,10 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             		strcpy(info,"200");
             	}
             	cout<<"folder file "<<folder_files<<endl;
+            	strcpy(filename,"/*--folder--*/");
             	sprintf(response, server_response_msg, info,filename,to_string(folder_files.size()).c_str());
+                string record="FileServer resp to "+string(s)+" :"+string(response);
+                cout<<record<<endl;
             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -200,27 +209,13 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	char cord[INET6_ADDRSTRLEN];
             	cord[0]='\0';
             	strcpy(cord,coordinator.c_str());
+                string record=" FileServer resp to "+string(s)+" Coordinator:"+string(cord);
+                cout<<record<<endl;
             	if(send(new_fd,cord,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
                 }
             }
-
-            // else if(strcmp(request_type,"LIST_ALL_SERVER")==0){
-            // 	string tmp="";
-            // 	for(auto x:am->get_alive_member()){
-            // 		tmp+=x;
-            // 		tmp+="\t";
-            // 	}
-            // 	char resp[BUFFER_SIZE];
-            // 	resp[0]='\0';
-            // 	strcpy(resp,tmp.c_str());
-            // 	if(send(new_fd,resp,BUFFER_SIZE,0)<0){
-            // 		perror("cannot send");
-            // 		exit(1);
-            // 	}
-
-            // }
 
             else if(strcmp(request_type,"GET_FILE_ADDR_ONE")==0){
             	int rnd = rand()%3; 
@@ -233,6 +228,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 	    		else{
 	    			strcpy(file_addr,file_addr_map->at(fn)[rnd].c_str());
 	    		}
+                string record="FileServer resp to "+string(s)+" :"+string(file_addr);
+                cout<<record<<endl;
 	    		if(send(new_fd,file_addr,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -255,6 +252,9 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 					}
 					strcpy(resp,tmp_str.c_str());
 				}
+                string record="FileServer resp to "+string(s)+" :"+string(resp);
+                cout<<record<<endl;
+                 
 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -270,6 +270,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             		tmp_str+="\t";
             	}
             	strcpy(resp,tmp_str.c_str());
+                string record="ls all files FileServer resp to "+string(s)+" :"+string(resp);
+                cout<<record<<endl;
             	if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -281,7 +283,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	char resp[BUFFER_SIZE];
             	resp[0]='\0';
 				if(file_addr_map->find(fn)==file_addr_map->end()){
-					if(am->get_alive_member().size()<DUPLICATE_COUNT){
+                    if(false){
+					// if(am->get_alive_member().size()<DUPLICATE_COUNT){
 						strcpy(resp,"500");//violate consistency requirement
 					}
 					else{
@@ -303,6 +306,8 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 					}
 					strcpy(resp,tmp_str.c_str());
 				}
+                string record="request post file FileServer resp to "+string(s)+" :"+string(resp);
+                cout<<record<<endl;
 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
                         exit(1);
@@ -321,13 +326,15 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             		}
             	}
             	file_addr_map->at(string(filename))=v;
+                string record="FileServer insert file entry: "+string(filename)+": "+ip_addrs;
+                cout<<record<<endl;
 
             }
             else if(strcmp(request_type,"DELETE_FILE_ENTRY")==0){
             	file_addr_map->erase(string(filename));
+                 if(_lg)
+                        _lg->add_write_log_task("FileServer delete file entry: "+string(filename));
             }
-
-
 
             close(new_fd);
             exit(0);

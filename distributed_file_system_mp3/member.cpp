@@ -99,5 +99,3 @@ std::vector<machine_info> alive_member::get_alive_member_with_id(){
 	std::lock_guard<std::mutex> guard(mutex);
 	return _am;
 }
-
- 

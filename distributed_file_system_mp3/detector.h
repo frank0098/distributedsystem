@@ -8,7 +8,7 @@
 #include <string>
 #include <algorithm>
 
-#define DETECTOR_SLEEP_TIME_CONFIG 5
+#define DETECTOR_SLEEP_TIME_CONFIG 10
 
 class detector:public Thread{
 public:
