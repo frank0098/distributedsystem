@@ -90,7 +90,7 @@ class network_server:public network{
 public:
 	network_server(const char* port,loggerThread* lg);
 	void connect() override;
-	void serve_forever(alive_member* am,std::unordered_map<std::string,std::vector<string> > *file_addr_map);
+	void serve_forever(alive_member* am);
 	// static bool server_send(int sockfd,msg_t msgtype);
 	// static msg_t recv_msg(int sockfd);
 

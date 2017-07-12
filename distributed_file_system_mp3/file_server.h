@@ -8,8 +8,13 @@
 #include <unordered_map>
 #include <cstdlib> 
 #include <ctime> 
+#include <sstream>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <sys/mman.h>
 
 #define DUPLICATE_COUNT 3
+const string map_in_file="file_add";
 class file_server:public Thread{
 public:
 	file_server(loggerThread *lg,alive_member *am);
@@ -19,7 +24,7 @@ private:
 	loggerThread* _lg;
 	network_server* _nw;
 	alive_member *_am;
-	std::unordered_map<std::string,std::vector<string> > file_addr_map;
+	// std::unordered_map<std::string,std::vector<string> > file_addr_map;
 
 
 };

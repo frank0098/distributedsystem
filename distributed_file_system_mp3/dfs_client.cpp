@@ -155,9 +155,11 @@ bool network_client::file_server_client(char* filename,const char* request_type,
     }
     else if(strcmp(request_type,"COORDINATOR")==0 || strcmp(request_type,"GET_FILE_ADDR_ONE")==0 
     	|| strcmp(request_type,"GET_FILE_ADDR_ALL")==0 || strcmp(request_type,"REQUEST_POST_FILE")==0
-    	|| strcmp(request_type,"LIST_ALL_FILES")==0 || strcmp(request_type,"INSERT_FILE_ENTRY")){
-    	sprintf(query,client_msg,request_type,filename,USERAGENT,(_hostname+":"+_PORT).c_str(),CONNECTIONTYPE,"0","");
-
+    	|| strcmp(request_type,"LIST_ALL_FILES")==0 || strcmp(request_type,"INSERT_FILE_ENTRY")==0){
+    	// cout<<"i am over here"<<endl;
+    	// if(strcmp(request_type,"INSERT_FILE_ENTRY")==0) return true;
+    	sprintf(query,client_msg,request_type,filename,USERAGENT,(_hostname+":"+_PORT).c_str(),CONNECTIONTYPE,"0",msg);
+    	// cout<<query	<<endl;
     	if((send(_sockfd,query,BUFFER_SIZE,0))<0) {
             perror("cannot send query");
             return false;
@@ -255,7 +257,8 @@ void file_op(char* filename,char* request_type){
 
 		char file_ip_addr[BUFFER_SIZE];
 		file_ip_addr[0]='\0';
-		if(nw->file_server_client("","GET_FILE_ADDR_ALL",file_ip_addr)==false){
+		std::vector<string> v_ip;
+		if(nw->file_server_client(filename,"GET_FILE_ADDR_ALL",file_ip_addr)==false){
 			cout<<"GET_FILE_ADDR_ALL from coordinator "<<coordinator<<" for file"<<filename<<" The file does not exist!"<<endl;
 		}
 		
@@ -279,12 +282,12 @@ void file_op(char* filename,char* request_type){
 			delete nw;
 			nw=nullptr;
 
-			cout<<file_ip_addr<<endl;
+			// cout<<file_ip_addr<<endl;
 			string ip_addrs=string(file_ip_addr);
-			std::vector<string> v_ip;
+			
 			int loc=0;
 			for(int i=0;i<ip_addrs.size();i++){
-				if(ip_addrs[i]=='\t'){
+				if(ip_addrs[i]=='@'){
 					v_ip.push_back(ip_addrs.substr(loc,i-loc));
 					loc=i+1;
 				}
@@ -293,11 +296,11 @@ void file_op(char* filename,char* request_type){
 				cout<<"NO AVAILABLE STORE.POST FAIL"<<endl;
 				exit(0);
 			}
-			if(!fork()){
 				for(auto ip:members){
 					cout<<"member<<"<<ip<<endl;
 					network_client* mmp=new network_client(ip,FILE_SERVER_PORT);
 					mmp->connect();
+					cout<<file_ip_addr<<endl;
 					if(mmp->file_server_client(filename,"INSERT_FILE_ENTRY",file_ip_addr)){
 						cout<<"INSERT_FILE_ENTRY"<<filename<<"to"<<ip<< "entry"<<file_ip_addr<<" Successfully!"<<endl;
 					}
@@ -308,34 +311,45 @@ void file_op(char* filename,char* request_type){
 					delete mmp;
 					mmp=nullptr;
 
-			}
 
+				}
+			}
+			else{
+				string ip_addrs=string(file_ip_addr);
+			
+				int loc=0;
+				for(int i=0;i<ip_addrs.size();i++){
+					if(ip_addrs[i]=='@'){
+						v_ip.push_back(ip_addrs.substr(loc,i-loc));
+						loc=i+1;
+					}
+				}
 			}
 
 
 				// if(!fork())  //WHY I CANNOT FORK HERE???
-				// {
-				// 		for(auto ip:v_ip){
-				// 			if(ip.size()<7) continue;
+				
+						for(auto ip:v_ip){
+							if(ip.size()<7) continue;
 
-				// 			if(ip.substr(0,7)=="::ffff:"){
-				// 				ip=ip.substr(7);
-				// 			}
-				// 			char tmpip[BUFFER_SIZE];
-				// 			strcpy(tmpip,ip.c_str());
-				// 			network_client* nnw=new network_client(ip,FILE_SERVER_PORT);
-				// 			nnw->connect();
-				// 			if(nnw->file_server_client(filename,"POST",tmpip)==false){
-				// 				cout<<"POST FAIL to fileserver "<<ip<<" for file"<<filename<<" FAIL!"<<endl;
-				// 			}
-				// 			else{
-				// 				cout<<"POST SUCCESS to fileserver "<<ip<<" for file"<<filename<<" SUCCESS!"<<endl;
-				// 			}
-				// 			nnw->disconnect();
-				// 			delete nnw;
-				// 		}
-				// 		cout<<endl;
-				// 		exit(0);
+							if(ip.substr(0,7)=="::ffff:"){
+								ip=ip.substr(7);
+							}
+							char tmpip[BUFFER_SIZE];
+							strcpy(tmpip,ip.c_str());
+							network_client* nnw=new network_client(ip,FILE_SERVER_PORT);
+							nnw->connect();
+							if(nnw->file_server_client(filename,"POST",tmpip)==false){
+								cout<<"POST FAIL to fileserver "<<ip<<" for file"<<filename<<" FAIL!"<<endl;
+							}
+							else{
+								cout<<"POST SUCCESS to fileserver "<<ip<<" for file"<<filename<<" SUCCESS!"<<endl;
+							}
+							nnw->disconnect();
+							delete nnw;
+						
+						// cout<<endl;
+						// exit(0);
 				// }
 				
 				
@@ -345,7 +359,49 @@ void file_op(char* filename,char* request_type){
 
 	}
 	else if(strcmp(request_type,"DELETE")==0) {
-		//TODO
+		network_client* nw =new network_client(coordinator,FILE_SERVER_PORT);
+		nw->connect();
+		char file_ip_addr[BUFFER_SIZE];
+		file_ip_addr[0]='\0';
+		std::vector<string> v_ip;
+		if(nw->file_server_client(filename,"GET_FILE_ADDR_ALL",file_ip_addr)==false){
+			cout<<"GET_FILE_ADDR_ALL from coordinator "<<coordinator<<" for file"<<filename<<" The file does not exist!"<<endl;
+		}
+		
+		nw->disconnect();
+		delete nw;
+		if(strcmp(file_ip_addr,"404")==0){
+			cout<<"Delete: file "+string(filename)+" does not exist"<<endl;
+			return;
+		}
+		string ip_addrs=string(file_ip_addr);
+
+		int loc=0;
+		for(int i=0;i<ip_addrs.size();i++){
+			if(ip_addrs[i]=='@'){
+				v_ip.push_back(ip_addrs.substr(loc,i-loc));
+				loc=i+1;
+			}
+		}
+		for(auto ip:v_ip){
+			if(ip.size()<7) continue;
+
+			if(ip.substr(0,7)=="::ffff:"){
+				ip=ip.substr(7);
+			}
+			char tmpip[BUFFER_SIZE];
+			strcpy(tmpip,ip.c_str());
+			network_client* nnw=new network_client(ip,FILE_SERVER_PORT);
+			nnw->connect();
+			if(nnw->file_server_client(filename,"DELETE",tmpip)==false){
+				cout<<"DELETE FAIL to fileserver "<<ip<<" for file"<<filename<<" FAIL!"<<endl;
+			}
+			else{
+				cout<<"DELETE SUCCESS to fileserver "<<ip<<" for file"<<filename<<" SUCCESS!"<<endl;
+			}
+			nnw->disconnect();
+			delete nnw;
+		}
 	}
 	else if(strcmp(request_type,"LS")==0) {
 		network_client* nw =new network_client(coordinator,FILE_SERVER_PORT);

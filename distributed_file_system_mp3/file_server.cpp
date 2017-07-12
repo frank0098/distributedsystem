@@ -12,14 +12,72 @@ file_server::~file_server(){
 }
 
 void* file_server::run(){
-	_nw->serve_forever(_am,&file_addr_map);
+	_nw->serve_forever(_am);
+}
+
+// void* create_shared_memory(size_t size) {
+//   // Our memory buffer will be readable and writable:
+//   int protection = PROT_READ | PROT_WRITE;
+
+//   // The buffer will be shared (meaning other processes can access it), but
+//   // anonymous (meaning third-party processes cannot obtain an address for it),
+//   // so only this process and its children will be able to use it:
+//   int visibility = MAP_ANONYMOUS | MAP_SHARED;
+
+//   // The remaining parameters to `mmap()` are not important for this use case,
+//   // but the manpage for `mmap` explains their purpose.
+//   return mmap(NULL, size, protection, visibility, 0, 0);
+// }
+
+void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
+    std::ifstream fin(map_in_file);
+    if(fin.is_open()){
+        // std::istringstream ss;
+        std::string line;
+        std::vector<string> v;
+        while(getline(fin,line,'\n')){
+            if(line=="") continue;
+            std::istringstream sss(line);
+            std::string filename="";
+            std::getline(sss,filename,' ');
+            std::string ip;
+            while(std::getline(sss,ip,' ')){
+                v.push_back(ip);
+            }
+            file_addr_map->insert({filename,v});
+
+        }
+    }
+    else{
+        cout<<"CONFIG FILE DOES NOT EXIST/FAIL"<<endl;
+    }
+}
+
+void write_map_to_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
+    std::ofstream outfile(map_in_file);
+    outfile.close();
+    outfile.open(map_in_file, std::ios_base::app);
+    if(outfile.is_open()){
+        for(auto it=file_addr_map->begin();it!=file_addr_map->end();++it){
+            string output=it->first;
+            output+=" ";
+            vector<string> vv=it->second;
+            for(auto x:vv){
+                output+=x;
+                output+=" ";
+            }
+            output+="\n";
+            outfile<<output;
+        }
+    }
+    outfile.close();
 }
 
 
 // const char *server_response_msg = "HTTP/1.1 %s\r\nThe file requested is %s with SIZE %s\r\n\r\n";
 // const char *client_msg="%s %s HTTP/1.1\r\nUser-Agent: %s\r\nHost: %s\r\nConnection: %s\r\nSIZE: %s \r\n\r\n";
 
-void network_server::serve_forever(alive_member* am,std::unordered_map<std::string,std::vector<string> > *file_addr_map) {
+void network_server::serve_forever(alive_member* am) {
     socklen_t sin_size;
     struct sockaddr_storage their_addr;
     int new_fd;
@@ -48,8 +106,9 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
         char dummy[30];
         char request_type[30];
         char requested_file_size[30];
-        char info[100];
-        sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size,info);
+        char additionalinfo[100];
+        request_type[0]='\0';
+        sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size,additionalinfo);
         if(_lg) {
             _lg->add_write_log_task("FileServer recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
         }
@@ -68,6 +127,9 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             char info[30];
             char buf[BUFFER_SIZE];
             char response[BUFFER_SIZE];
+            cout<<endl<<"==========new fork session=============="<<endl;
+            std::unordered_map<std::string,std::vector<string> > file_addr_map;
+            read_map_from_file(&file_addr_map);
             if(strcmp(request_type,"GET")==0) {
                 std::ifstream fin(file,std::ios_base::in);
                 if(fin.is_open()) {
@@ -79,7 +141,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
                     sprintf(sizemsg, "%d", file_size);
                     int file_size_left=file_size;
                     sprintf(response, server_response_msg, info, filename,sizemsg);
-                    string record="FileServer resp to "+string(s)+" :"+string(response);
+                    string record="GET: FileServer resp to "+string(s)+" :"+string(response);
                     cout<<record<<endl;
                     if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -158,7 +220,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             		strcpy(info,"404");
             	}
                 sprintf(response, server_response_msg, info,filename,"0");
-                string record="FileServer resp to "+string(s)+" :"+string(response);
+                string record="DELETE: FileServer resp to "+string(s)+" :"+string(response);
                 cout<<record<<endl;
             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -191,7 +253,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	cout<<"folder file "<<folder_files<<endl;
             	strcpy(filename,"/*--folder--*/");
             	sprintf(response, server_response_msg, info,filename,to_string(folder_files.size()).c_str());
-                string record="FileServer resp to "+string(s)+" :"+string(response);
+                string record="LS: FileServer resp to "+string(s)+" :"+string(response);
                 cout<<record<<endl;
             	if(send(new_fd,response,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -209,7 +271,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	char cord[INET6_ADDRSTRLEN];
             	cord[0]='\0';
             	strcpy(cord,coordinator.c_str());
-                string record=" FileServer resp to "+string(s)+" Coordinator:"+string(cord);
+                string record="Coordinator: FileServer resp to "+string(s)+" Coordinator:"+string(cord);
                 cout<<record<<endl;
             	if(send(new_fd,cord,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -222,13 +284,13 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 	    		string fn=string(filename);
 	    		char file_addr[INET6_ADDRSTRLEN];
 	    		file_addr[0]='\0';
-	    		if(file_addr_map->find(fn)==file_addr_map->end()){
+	    		if(file_addr_map.find(fn)==file_addr_map.end()){
 	    			strcpy(file_addr,"404");
 	    		}
 	    		else{
-	    			strcpy(file_addr,file_addr_map->at(fn)[rnd].c_str());
+	    			strcpy(file_addr,file_addr_map.at(fn)[rnd].c_str());
 	    		}
-                string record="FileServer resp to "+string(s)+" :"+string(file_addr);
+                string record="GET_FILE_ADDR_ONE: FileServer resp to "+string(s)+" :"+string(file_addr);
                 cout<<record<<endl;
 	    		if(send(new_fd,file_addr,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -238,21 +300,22 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             }
             else if(strcmp(request_type,"GET_FILE_ADDR_ALL")==0){
             	string fn=string(filename);
+                cout<<"****fn"<<fn<<endl;
             	char resp[BUFFER_SIZE];
             	resp[0]='\0';
-				if(file_addr_map->find(fn)==file_addr_map->end()){
+				if(file_addr_map.find(fn)==file_addr_map.end()){
 					strcpy(resp,"404");
 				}
 				else{
 					string tmp_str="";
-					std::vector<string> v=file_addr_map->at(fn);
+					std::vector<string> v=file_addr_map.at(fn);
 					for(auto x:v){
 						tmp_str+=x;
-						tmp_str+="\t";
+						tmp_str+="@";
 					}
 					strcpy(resp,tmp_str.c_str());
 				}
-                string record="FileServer resp to "+string(s)+" :"+string(resp);
+                string record="GET_FILE_ADDR_ALL: FileServer resp to "+string(s)+" :"+string(resp);
                 cout<<record<<endl;
                  
 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
@@ -264,13 +327,14 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 			else if(strcmp(request_type,"LIST_ALL_FILES")==0){
             	char resp[BUFFER_SIZE];
             	resp[0]='\0';
-            	string tmp_str;
-            	for(auto it=file_addr_map->begin();it!=file_addr_map->end();++it){
+            	string tmp_str="";
+            	for(auto it=file_addr_map.begin();it!=file_addr_map.end();++it){
+                    cout<<it->first<<endl;
             		tmp_str+=it->first;
-            		tmp_str+="\t";
+            		tmp_str+="@";
             	}
             	strcpy(resp,tmp_str.c_str());
-                string record="ls all files FileServer resp to "+string(s)+" :"+string(resp);
+                string record="LIST_ALL_FILES FileServer resp to "+string(s)+" :"+string(resp);
                 cout<<record<<endl;
             	if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -282,7 +346,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             	string fn=string(filename);
             	char resp[BUFFER_SIZE];
             	resp[0]='\0';
-				if(file_addr_map->find(fn)==file_addr_map->end()){
+				if(file_addr_map.find(fn)==file_addr_map.end()){
                     if(false){
 					// if(am->get_alive_member().size()<DUPLICATE_COUNT){
 						strcpy(resp,"500");//violate consistency requirement
@@ -292,7 +356,7 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 						string tmp_str="";
 						for(auto x:v){
 							tmp_str+=x;
-							tmp_str+="\t";
+							tmp_str+="@";
 						}
 						strcpy(resp,tmp_str.c_str());
 					}
@@ -300,13 +364,13 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
 				}
 				else{
 					string tmp_str="";
-					for(auto x:file_addr_map->at(fn)){
+					for(auto x:file_addr_map.at(fn)){
 						tmp_str+=x;
-						tmp_str+="\t";
+						tmp_str+="@";
 					}
 					strcpy(resp,tmp_str.c_str());
 				}
-                string record="request post file FileServer resp to "+string(s)+" :"+string(resp);
+                string record="REQUEST_POST_FILE FileServer resp to "+string(s)+" :"+string(resp);
                 cout<<record<<endl;
 				if(send(new_fd,resp,BUFFER_SIZE,0)<0) {
                         perror("cannot send");
@@ -316,24 +380,39 @@ void network_server::serve_forever(alive_member* am,std::unordered_map<std::stri
             }
             else if(strcmp(request_type,"INSERT_FILE_ENTRY")==0){
             	std::vector<string> v;
-            	
-            	string ip_addrs=string(info);
+            	file_addr_map.erase(filename);
+            	string ip_addrs=string(additionalinfo);
+                cout<<"additionalinfo  "<<additionalinfo<<endl;
             	size_t prev_loc=0;
             	for(size_t i=0;i<ip_addrs.size();++i){
-            		if(ip_addrs[i]=='\t'){
-            			v.push_back(ip_addrs.substr(prev_loc,i-prev_loc));
+            		if(ip_addrs[i]=='@'){
+                        string tmpip=ip_addrs.substr(prev_loc,i-prev_loc);
+                        string ip=tmpip;
+                        if(tmpip.size()>=7 and tmpip.substr(0,7)=="::ffff:") ip=tmpip.substr(7);
+            			v.push_back(ip);
+                        // cout<<ip<<endl;
             			prev_loc=i+1;
             		}
             	}
-            	file_addr_map->at(string(filename))=v;
-                string record="FileServer insert file entry: "+string(filename)+": "+ip_addrs;
+            	file_addr_map.insert({string(filename),v});
+                // for(auto it=file_addr_map.begin();it!=file_addr_map.end();++it){
+                //     cout<<"STORE"<<it->first<<endl;
+                // }
+                string record="INSERT_FILE_ENTRY: filename: "+string(filename);
                 cout<<record<<endl;
+
+                write_map_to_file(&file_addr_map);
 
             }
             else if(strcmp(request_type,"DELETE_FILE_ENTRY")==0){
-            	file_addr_map->erase(string(filename));
-                 if(_lg)
-                        _lg->add_write_log_task("FileServer delete file entry: "+string(filename));
+            	file_addr_map.erase(string(filename));
+                 // if(_lg)
+                 //        _lg->add_write_log_task("FileServer delete file entry: "+string(filename));
+
+                string record="DELETE_FILE_ENTRY: filename: "+string(filename);
+                cout<<record<<endl;
+
+                write_map_to_file(&file_addr_map);
             }
 
             close(new_fd);
