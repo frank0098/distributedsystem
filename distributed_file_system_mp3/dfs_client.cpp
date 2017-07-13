@@ -115,17 +115,21 @@ bool network_client::file_server_client(char* filename,const char* request_type,
         }
     }
     else if(strcmp(request_type,"DELETE")==0){
+    	cout<<"i am over here"<<endl;
     	sprintf(query,client_msg,request_type,filename,USERAGENT,(_hostname+":"+_PORT).c_str(),CONNECTIONTYPE,"0","");
    		if((send(_sockfd,query,BUFFER_SIZE,0))<0) {
             perror("cannot send query");
             return false;
+
         }
+        cout<<"wht"<<endl;
         if(recv(_sockfd,buf,BUFFER_SIZE,0)==-1) {
             perror("recv");
             return false;
         }
+        cout<<"god dam it"<<endl;
         sscanf(buf, server_response_msg, info,filename,file_size);
-        cout<<buf<<endl;
+        cout<<"buf"<<buf<<endl;
     	if(strcmp(info,"200")!=0) return false;
     }
     else if(strcmp(request_type,"LS")==0){
@@ -155,7 +159,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
     }
     else if(strcmp(request_type,"COORDINATOR")==0 || strcmp(request_type,"GET_FILE_ADDR_ONE")==0 
     	|| strcmp(request_type,"GET_FILE_ADDR_ALL")==0 || strcmp(request_type,"REQUEST_POST_FILE")==0
-    	|| strcmp(request_type,"LIST_ALL_FILES")==0 || strcmp(request_type,"INSERT_FILE_ENTRY")==0){
+    	|| strcmp(request_type,"LIST_ALL_FILES")==0 || strcmp(request_type,"INSERT_FILE_ENTRY")==0
+    	|| strcmp(request_type,"DELETE_FILE_ENTRY")==0){
     	// cout<<"i am over here"<<endl;
     	// if(strcmp(request_type,"INSERT_FILE_ENTRY")==0) return true;
     	sprintf(query,client_msg,request_type,filename,USERAGENT,(_hostname+":"+_PORT).c_str(),CONNECTIONTYPE,"0",msg);
@@ -402,6 +407,26 @@ void file_op(char* filename,char* request_type){
 			nnw->disconnect();
 			delete nnw;
 		}
+
+		for(auto ip:v_ip){
+			if(ip.size()<7) continue;
+
+			if(ip.substr(0,7)=="::ffff:"){
+				ip=ip.substr(7);
+			}
+			char tmpip[BUFFER_SIZE];
+			strcpy(tmpip,ip.c_str());
+			network_client* nnw=new network_client(ip,FILE_SERVER_PORT);
+			nnw->connect();
+			if(nnw->file_server_client(filename,"DELETE_FILE_ENTRY",tmpip)==false){
+				cout<<"DELETE_FILE_ENTRY SUCCESS to fileserver "<<ip<<" for file"<<filename<<" FAIL!"<<endl;
+			}
+			else{
+				cout<<"DELETE_FILE_ENTRY FAIL to fileserver "<<ip<<" for file"<<filename<<" SUCCESS!"<<endl;
+			}
+			nnw->disconnect();
+			delete nnw;
+		}
 	}
 	else if(strcmp(request_type,"LS")==0) {
 		network_client* nw =new network_client(coordinator,FILE_SERVER_PORT);
@@ -427,7 +452,6 @@ void file_op(char* filename,char* request_type){
 			nw->connect();
 			char all_files[BUFFER_SIZE];
 			if(nw->file_server_client("","LS",all_files)){
-				cout<<"wtf"<<endl;
 				cout<<"Files in "<<m<<" :"<<all_files;
 			}
 			else{

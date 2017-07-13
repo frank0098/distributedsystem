@@ -109,6 +109,7 @@ void network_server::serve_forever(alive_member* am) {
         char additionalinfo[100];
         request_type[0]='\0';
         sscanf(buf,client_msg,request_type,filename,dummy,dummy,dummy,requested_file_size,additionalinfo);
+        // cout<<"buf"<<buf<<endl;
         if(_lg) {
             _lg->add_write_log_task("FileServer recv "+string(request_type)+" type filename: "+filename +"from "+string(s));
         }
@@ -211,12 +212,13 @@ void network_server::serve_forever(alive_member* am) {
 
             }
             else if(strcmp(request_type,"DELETE")==0) {
+                //access _lg causes deadlock
             	if(remove(file)==0){
-            		_lg->add_write_log_task("File "+string(file)+" has been removed");
+            		// _lg->add_write_log_task("File "+string(file)+" has been removed");
             		strcpy(info,"200");
             	}
             	else{
-            		_lg->add_write_log_task("File "+string(file)+" doesnt exist");
+            		// _lg->add_write_log_task("File "+string(file)+" doesnt exist");
             		strcpy(info,"404");
             	}
                 sprintf(response, server_response_msg, info,filename,"0");
