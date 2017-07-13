@@ -14,7 +14,7 @@
 // #include <sys/mman.h>
 
 #define DUPLICATE_COUNT 3
-const string map_in_file="file_add";
+const string map_in_file="files.store";
 class file_server:public Thread{
 public:
 	file_server(loggerThread *lg,alive_member *am);
