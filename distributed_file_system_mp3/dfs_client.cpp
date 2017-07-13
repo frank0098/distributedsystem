@@ -41,7 +41,7 @@ bool network_client::file_server_client(char* filename,const char* request_type,
     char info[30];
     char file_size[30];
     file_size[0]='\0';
-    cout<<"REQUEST "<<request_type<<endl;
+    // cout<<"REQUEST "<<request_type<<endl;
     if(strcmp(request_type,"GET")==0) {
         std::ofstream outfile(filename);
         outfile.close();
@@ -142,20 +142,15 @@ bool network_client::file_server_client(char* filename,const char* request_type,
             perror("recv");
             return false;
         }
-        cout<<buf<<endl;
         char dummy[30];
         sscanf(buf, server_response_msg, info,dummy,file_size);
     	if(strcmp(info,"200")!=0) return false;
     	int file_size_number=atoi(file_size);
-    	cout<<file_size_number<<endl;
-    	// char res[file_size_number+1];
     	if(recv(_sockfd,msg,file_size_number,0)==-1){
     		perror("recv");
     		return false;
     	}
     	msg[file_size_number]='\0';
-    	cout<<msg<<endl;
-    	// cout<<res<<endl;
     }
     else if(strcmp(request_type,"COORDINATOR")==0 || strcmp(request_type,"GET_FILE_ADDR_ONE")==0 
     	|| strcmp(request_type,"GET_FILE_ADDR_ALL")==0 || strcmp(request_type,"REQUEST_POST_FILE")==0
@@ -452,7 +447,7 @@ void file_op(char* filename,char* request_type){
 			nw->connect();
 			char all_files[BUFFER_SIZE];
 			if(nw->file_server_client("","LS",all_files)){
-				cout<<"Files in "<<m<<" :"<<all_files;
+				cout<<"Files in "<<m<<" :"<<all_files<<endl;
 			}
 			else{
 				cout<<"Server "<<m<<" is unreachable"<<endl;

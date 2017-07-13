@@ -128,7 +128,7 @@ void network_server::serve_forever(alive_member* am) {
             char info[30];
             char buf[BUFFER_SIZE];
             char response[BUFFER_SIZE];
-            cout<<endl<<"==========new fork session=============="<<endl;
+            // cout<<endl<<"==========new fork session=============="<<endl;
             std::unordered_map<std::string,std::vector<string> > file_addr_map;
             read_map_from_file(&file_addr_map);
             if(strcmp(request_type,"GET")==0) {
