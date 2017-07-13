@@ -33,6 +33,7 @@
 
 *.log
 *.sh
+*.store
 
 .DS_Store
 *.DS_Store
