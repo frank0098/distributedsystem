@@ -34,7 +34,7 @@ void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *fi
     const char *homedir = pw->pw_dir;
     char fp[30];
     strcpy(fp,homedir);
-    strcpy("/dfs/");
+    strcat(fp,"/dfs/");
     strcat(fp,map_in_file);
     std::ifstream fin(fp);
     if(fin.is_open()){
@@ -64,7 +64,7 @@ void write_map_to_file(std::unordered_map<std::string,std::vector<string> > *fil
     const char *homedir = pw->pw_dir;
     char fp[30];
     strcpy(fp,homedir);
-    strcpy(fp,"/dfs/");
+    strcat(fp,"/dfs/");
     strcat(fp,map_in_file);
     std::ofstream outfile(fp);
     outfile.close();

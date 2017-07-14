@@ -110,7 +110,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
         }
         else {
-            perror("cannot open the file...%s\n",filename);
+        	perror(filename);
+            perror("cannot open this file...");
             return false;
         }
     }
@@ -371,7 +372,7 @@ void file_op(char* filename,char* request_type){
 		nw->disconnect();
 		delete nw;
 		if(strcmp(file_ip_addr,"404")==0){
-			cout<<"Delete: file "+string(basename(filename)+" does not exist"<<endl;
+			cout<<"Delete: file "+string(basename(filename))+" does not exist"<<endl;
 			return;
 		}
 		string ip_addrs=string(file_ip_addr);
