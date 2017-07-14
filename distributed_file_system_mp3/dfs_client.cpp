@@ -110,7 +110,7 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
         }
         else {
-            perror("cannot open the file...\n");
+            perror("cannot open the file...%s\n",filename);
             return false;
         }
     }
@@ -301,11 +301,11 @@ void file_op(char* filename,char* request_type){
 					network_client* mmp=new network_client(ip,FILE_SERVER_PORT);
 					mmp->connect();
 					cout<<file_ip_addr<<endl;
-					if(mmp->file_server_client(filename,"INSERT_FILE_ENTRY",file_ip_addr)){
-						cout<<"INSERT_FILE_ENTRY"<<filename<<"to"<<ip<< "entry"<<file_ip_addr<<" Successfully!"<<endl;
+					if(mmp->file_server_client(basename(filename),"INSERT_FILE_ENTRY",file_ip_addr)){
+						cout<<"INSERT_FILE_ENTRY"<<basename(filename)<<"to"<<ip<< "entry"<<file_ip_addr<<" Successfully!"<<endl;
 					}
 					else{
-						cout<<"INSERT_FILE_ENTRY"<<filename<<"to"<<ip<< "entry"<<file_ip_addr<<" FAIL!"<<endl;
+						cout<<"INSERT_FILE_ENTRY"<<basename(filename)<<"to"<<ip<< "entry"<<file_ip_addr<<" FAIL!"<<endl;
 					}
 					mmp->disconnect();
 					delete mmp;
@@ -364,14 +364,14 @@ void file_op(char* filename,char* request_type){
 		char file_ip_addr[BUFFER_SIZE];
 		file_ip_addr[0]='\0';
 		std::vector<string> v_ip;
-		if(nw->file_server_client(filename,"GET_FILE_ADDR_ALL",file_ip_addr)==false){
+		if(nw->file_server_client(basename(filename),"GET_FILE_ADDR_ALL",file_ip_addr)==false){
 			cout<<"GET_FILE_ADDR_ALL from coordinator "<<coordinator<<" for file"<<filename<<" The file does not exist!"<<endl;
 		}
 		
 		nw->disconnect();
 		delete nw;
 		if(strcmp(file_ip_addr,"404")==0){
-			cout<<"Delete: file "+string(filename)+" does not exist"<<endl;
+			cout<<"Delete: file "+string(basename(filename)+" does not exist"<<endl;
 			return;
 		}
 		string ip_addrs=string(file_ip_addr);

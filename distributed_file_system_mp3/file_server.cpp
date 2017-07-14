@@ -30,7 +30,13 @@ void* file_server::run(){
 // }
 
 void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
-    std::ifstream fin(map_in_file);
+    struct passwd *pw = getpwuid(getuid());
+    const char *homedir = pw->pw_dir;
+    char fp[30];
+    strcpy(fp,homedir);
+    strcpy("/dfs/");
+    strcat(fp,map_in_file);
+    std::ifstream fin(fp);
     if(fin.is_open()){
         // std::istringstream ss;
         std::string line;
@@ -54,7 +60,13 @@ void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *fi
 }
 
 void write_map_to_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
-    std::ofstream outfile(map_in_file);
+    struct passwd *pw = getpwuid(getuid());
+    const char *homedir = pw->pw_dir;
+    char fp[30];
+    strcpy(fp,homedir);
+    strcpy(fp,"/dfs/");
+    strcat(fp,map_in_file);
+    std::ofstream outfile(fp);
     outfile.close();
     outfile.open(map_in_file, std::ios_base::app);
     if(outfile.is_open()){
