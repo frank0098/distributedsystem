@@ -111,7 +111,6 @@ bool network_client::file_server_client(char* filename,const char* request_type,
         }
         else {
         	perror(filename);
-            perror("cannot open this file...");
             return false;
         }
     }
