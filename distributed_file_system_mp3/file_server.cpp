@@ -32,7 +32,7 @@ void* file_server::run(){
 void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
-    char fp[30];
+    char fp[50];
     strcpy(fp,homedir);
     strcat(fp,"/dfs/");
     strcat(fp,map_in_file);
@@ -62,7 +62,7 @@ void read_map_from_file(std::unordered_map<std::string,std::vector<string> > *fi
 void write_map_to_file(std::unordered_map<std::string,std::vector<string> > *file_addr_map){
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
-    char fp[30];
+    char fp[50];
     strcpy(fp,homedir);
     strcat(fp,"/dfs/");
     strcat(fp,map_in_file);
