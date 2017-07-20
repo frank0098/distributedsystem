@@ -227,7 +227,7 @@ void file_op(char* filename,char* request_type){
 		nw->connect();
 		char file_ip[BUFFER_SIZE];
 		file_ip[0]='\0';
-		if(nw->file_server_client("","GET_FILE_ADDR_ONE",file_ip)==false){
+		if(nw->file_server_client(filename,"GET_FILE_ADDR_ONE",file_ip)==false){
 			cout<<"GET_FILE_ADDR_ONE from coordinator "<<coordinator<<" for file"<<filename<<" FAIL!"<<endl;
 		}
 		nw->disconnect();
