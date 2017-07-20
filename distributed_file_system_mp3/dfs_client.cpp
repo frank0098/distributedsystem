@@ -77,6 +77,7 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
     }
     else if(strcmp(request_type,"POST")==0) {
+    	cout<<"asdf"<<filename<<endl;
         std::ifstream fin(filename,std::ios_base::in);
         if(fin.is_open()) {
         	struct stat st;
@@ -110,7 +111,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
         }
         else {
-            perror("cannot open this file...");
+        	perror(filename);
+            perror("cannot open this file...wtf!!!!!");
             return false;
         }
     }
