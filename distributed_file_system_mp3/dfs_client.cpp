@@ -77,7 +77,6 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
     }
     else if(strcmp(request_type,"POST")==0) {
-    	cout<<"asdf"<<filename<<endl;
         std::ifstream fin(filename,std::ios_base::in);
         if(fin.is_open()) {
         	struct stat st;
@@ -95,7 +94,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
                 perror("recv");
                	return false;
             }
-            sscanf(buf, server_response_msg, info,filename,file_size);
+            char dummy[20];
+            sscanf(buf, server_response_msg, info,dummy,file_size);
             
 
     		if(strcmp(info,"200")!=0) return false;
@@ -111,8 +111,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 
         }
         else {
-        	perror(filename);
             perror("cannot open this file...wtf!!!!!");
+            cout<<filename<<endl;
             return false;
         }
     }
@@ -182,7 +182,8 @@ bool network_client::file_server_client(char* filename,const char* request_type,
 }
 
 void file_op(char* filename,char* request_type){
-
+	char filename_full_path[128];
+	strcpy(filename_full_path,filename);
 	std::vector<string> members;
 	server_addr_read_config("server.cfg",members);
 	srand((unsigned)time(0)); 
@@ -299,7 +300,6 @@ void file_op(char* filename,char* request_type){
 				exit(0);
 			}
 				for(auto ip:members){
-					cout<<"member<<"<<ip<<endl;
 					network_client* mmp=new network_client(ip,FILE_SERVER_PORT);
 					mmp->connect();
 					cout<<file_ip_addr<<endl;
@@ -341,11 +341,11 @@ void file_op(char* filename,char* request_type){
 							strcpy(tmpip,ip.c_str());
 							network_client* nnw=new network_client(ip,FILE_SERVER_PORT);
 							nnw->connect();
-							if(nnw->file_server_client(filename,"POST",tmpip)==false){
-								cout<<"POST FAIL to fileserver "<<ip<<" for file"<<filename<<" FAIL!"<<endl;
+							if(nnw->file_server_client(filename_full_path,"POST",tmpip)==false){
+								cout<<"POST FAIL to fileserver "<<ip<<" for file"<<filename_full_path<<" FAIL!"<<endl;
 							}
 							else{
-								cout<<"POST SUCCESS to fileserver "<<ip<<" for file"<<filename<<" SUCCESS!"<<endl;
+								cout<<"POST SUCCESS to fileserver "<<ip<<" for file"<<filename_full_path<<" SUCCESS!"<<endl;
 							}
 							nnw->disconnect();
 							delete nnw;
