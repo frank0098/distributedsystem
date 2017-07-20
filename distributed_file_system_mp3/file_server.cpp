@@ -68,7 +68,7 @@ void write_map_to_file(std::unordered_map<std::string,std::vector<string> > *fil
     strcat(fp,map_in_file);
     std::ofstream outfile(fp);
     outfile.close();
-    outfile.open(map_in_file, std::ios_base::app);
+    outfile.open(fp, std::ios_base::app);
     if(outfile.is_open()){
         for(auto it=file_addr_map->begin();it!=file_addr_map->end();++it){
             string output=it->first;
