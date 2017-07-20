@@ -250,8 +250,8 @@ void network_server::serve_forever(alive_member* am) {
             	string folder_files="";
             	if((dir=opendir(path_name))!=nullptr){
             		while((ent=readdir(dir))!=nullptr){
-                        if(strcmp(ent->d_name),map_in_file)==0) continue;
             			string fname=string(ent->d_name);
+                        if(fname==string(map_in_file)) continue;
             			if(fname!="." and fname !=".."){
             				folder_files+=string(ent->d_name);
             				folder_files+="\t";
