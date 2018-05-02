@@ -57,8 +57,8 @@ printf("Binding datagram socket...OK.\n");
 /* interface. Note that this IP_ADD_MEMBERSHIP option must be */
 /* called for each local interface over which the multicast */
 /* datagrams are to be received. */
-group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
-group.imr_interface.s_addr = inet_addr("10.108.124.155");
+group.imr_multiaddr.s_addr = inet_addr("239.1.1.1");
+group.imr_interface.s_addr = inet_addr("127.0.0.1");
 if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
 {
 perror("Adding multicast group error");
