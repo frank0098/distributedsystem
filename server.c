@@ -44,7 +44,7 @@ printf("Disabling the loopback...OK.\n");
 /* Set local interface for outbound multicast datagrams. */
 /* The IP address specified must be associated with a local, */
 /* multicast capable interface. */
-localInterface.s_addr = inet_addr("10.108.124.155");
+localInterface.s_addr = inet_addr("10.108.34.31");
 if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 {
   perror("Setting local interface error");
