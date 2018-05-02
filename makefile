@@ -8,7 +8,7 @@ CFLAGS = -c -std=c++11
 all: server
 
 server: network_manager.o server.o
-	$(CC) network_manager.o server.o -o server.out
+	$(CC) -pthread network_manager.o server.o -o server.out
 
 server.o: network_manager.o
 	$(CC) $(CFLAGS) server.cpp
