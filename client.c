@@ -42,7 +42,7 @@ printf("Setting SO_REUSEADDR...OK.\n");
 /* specified as INADDR_ANY. */
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
-localSock.sin_port = htons(7000);
+localSock.sin_port = htons(4321);
 localSock.sin_addr.s_addr = inet_addr("226.1.1.1");;
 if(bind(sd, (struct sockaddr*)&localSock, sizeof(localSock)))
 {
@@ -57,17 +57,6 @@ printf("Binding datagram socket...OK.\n");
 /* interface. Note that this IP_ADD_MEMBERSHIP option must be */
 /* called for each local interface over which the multicast */
 /* datagrams are to be received. */
-group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
-group.imr_interface.s_addr = inet_addr("127.0.0.1");
-if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
-{
-perror("Adding multicast group error");
-close(sd);
-exit(1);
-}
-else
-printf("Adding multicast group...OK.\n");
-
 group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
 group.imr_interface.s_addr = inet_addr("10.108.34.31");
 if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)

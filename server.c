@@ -29,7 +29,6 @@ groupSock.sin_family = AF_INET;
 groupSock.sin_addr.s_addr = inet_addr("226.1.1.1");
 groupSock.sin_port = htons(7000);
  
-/* Disable loopback so you do not receive your own datagrams.
 {
 char loopch = 0;
 if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&loopch, sizeof(loopch)) < 0)
@@ -41,12 +40,11 @@ exit(1);
 else
 printf("Disabling the loopback...OK.\n");
 }
-*/
  
 /* Set local interface for outbound multicast datagrams. */
 /* The IP address specified must be associated with a local, */
 /* multicast capable interface. */
-localInterface.s_addr = inet_addr("127.0.0.1");
+localInterface.s_addr = inet_addr("10.108.34.31");
 if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 {
   perror("Setting local interface error");
