@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include <cstring>
 
 using std::string;
 // class Network_RPC:public Network{
