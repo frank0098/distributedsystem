@@ -67,6 +67,17 @@ exit(1);
 }
 else
 printf("Adding multicast group...OK.\n");
+
+group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
+group.imr_interface.s_addr = inet_addr("10.108.34.31");
+if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
+{
+perror("Adding multicast group error");
+close(sd);
+exit(1);
+}
+else
+printf("Adding multicast group...OK.\n");
  
 /* Read from the socket. */
 datalen = sizeof(databuf);
