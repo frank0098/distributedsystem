@@ -43,7 +43,7 @@ printf("Setting SO_REUSEADDR...OK.\n");
 memset((char *) &localSock, 0, sizeof(localSock));
 localSock.sin_family = AF_INET;
 localSock.sin_port = htons(4321);
-localSock.sin_addr.s_addr = inet_addr(INADDR_ANY);
+localSock.sin_addr.s_addr = inet_addr("10.108.34.31");
 if(bind(sd, (struct sockaddr*)&localSock, sizeof(localSock)))
 {
 perror("Binding datagram socket error");
