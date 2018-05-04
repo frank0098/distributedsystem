@@ -1,6 +1,9 @@
 #ifndef NETWORK_MANAGER_H
 #define NETWORK_MANAGER_H
 
+
+#include "logger.h"
+
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -10,79 +13,56 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <cstring>
+#include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
 
 using std::string;
+using std::vector;
 // class Network_RPC:public Network{
 // 	void connect();
 // 	void run_server(string dest_ip,unsigned short port);
 // };
+struct Peer_struct{
+	string peerip;
+	string peerport;
+	bool alive=false;
+	bool suspicious=false;
+};
+
+enum msg_t {
+	UNKNOWN='a',
+	TIMEOUT='b',
+	JOIN='c',
+	EXIT='d',
+	PING='e',
+	ACK='f',
+	INDIRECT_PING='g',
+	INDIRECT_ACK='h'
+};
 
 class Network{
 public:
-	// Network();
-	virtual void run_server()=0;
-	virtual void multicast()=0;
-	// virtual send(string dest_ip,unsigned short port);
-private:
-	bool _running;
+	Network();
+	virtual void connect()=0;
+	virtual void disconnect()=0;
+protected:
+	int _sockfd=-1;
+	string _hostname;
+	unsigned short _port;
 };
 
-class Network_Multicast:public Network{
+class Network_UDP:public Network{
 public:
-	void run_server();
-	void multicast();
+	Network_UDP(string hostname,unsigned short port);
+	static bool send_message(msg_t type,const char* dest,const char* dest_port,const char* source,const char* source_port,const char* info,const char* info_port);
+	msg_t recv_message(char* source, char* source_port, char* info, char* info_ip);
+	void wait_message_from_peers(vector<Peer_struct>& input);
+	void connect();
+	void disconnect();
 private:
-	const char* multicast_group="226.1.1.1";
 };
+
+
 #endif
-
-
-
-// here is one (trimmed) example of using select()
-
-// INT32    selectStatus;                                 /* select() return code */
-
-// char     tempreport[ 256 ] = {'\0'};
-
-// struct   timeval tv;
-
-// fd_set   fdread;
-// //fd_set   fdwrite;
-// //fd_set   fdexcep;
-
-
-
-// // note:
-// //  must try to read report until no report available 
-// // so have latest report in buffer
-// do
-// {
-//     /* Note: timeout must be (re)set every time before call to select() */
-//     tv.tv_sec = 1;
-//     tv.tv_usec = 0;
-
-
-//     FD_ZERO(&fdread);
-//     FD_SET( FD, &fdread );
-
-//     selectStatus = select(FD+1, &fdread, NULL, NULL, &tv);
-
-//     switch( selectStatus )
-//     {
-//         case -1:
-//             ....
-//             break;
-
-//         case 0:
-//             // timeout, I.E. nothing to read
-//             ....
-//             break;
-
-//         default: /* available to read */
-
-//             memset(tempreport, 0x00, sizeof(tempreport) );
-//             readStatus = read_UDP_socket( FD, tempreport, sizeof(tempreport), &readCount );
-
-//             break;
-//     } // end switch( selectStatus )
-// } while( (0 < selectStatus)&&(eRS_Success == readStatus ) );

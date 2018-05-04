@@ -1,132 +1,188 @@
 #include "network_manager.h"
 
+#define BUFFER_SIZE 256
 
+static const char *format = "FailureDetector/1.0 \r\nMsg sent is %c\r\nSource %s:%s\r\nAdditional info %s:%s\r\n\r\n";
 
+static void generate_msg(char* msg,msg_t msgtype,const char* source,const char* source_port,const char* info,const char* info_port){
+	msg[0]='\0';
+	sprintf(msg,format,(char)msgtype,source,source_port,info,info_port);
+}
+static msg_t get_response(char* msg,char* source,char* source_port,char* info,char* info_port){
+	msg_t msgtype=msg_t::UNKNOWN;
+	sscanf(msg,format,&msgtype,source,source_port,info,info_port);
+	return msgtype;
+}
+Network::Network(){
+	logger()->write("network module starts");
+}
 
-void Network_Multicast::run_server(){
-	printf("runserver\n");
-	char databuf[1024] = "Multicast test message lol!";
-	int datalen = sizeof(databuf);
+Network_UDP::Network_UDP(string hostname,unsigned short port):Network()
+{
+	_hostname=hostname;
+	_port=port;
+}
+void Network_UDP::connect(){
+	int sockfd;
+	struct addrinfo hints, *servinfo, *p;
+	int rv;
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_flags = AI_PASSIVE;
 
-	unsigned int port=7000;
-	struct sockaddr_in localSock;
-	struct ip_mreq group;
-
-	int sd = socket(AF_INET, SOCK_DGRAM, 0);
-	if(sd < 0)
-	{
-		perror("Opening datagram socket error");
-		exit(1);
+	char portstr[10];
+    sprintf(portstr, "%d", _port);
+	if ((rv = getaddrinfo(NULL,portstr, &hints, &servinfo))!= 0) {
+		char err[BUFFER_SIZE];
+		sprintf(err, "getaddrinfo: %s\n", gai_strerror(rv));
+		logger()->write(err);
+		return;
 	}
-	else
-		printf("Opening datagram socket....OK.\n");
-	int reuse = 0;
-	if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
-	{
-		perror("Setting SO_REUSEADDR error");
-		close(sd);
-		exit(1);
-	}
-	else
-	{
-		printf("Setting SO_REUSEADDR...OK.\n");
-	}
-
-	memset((char *) &localSock, 0, sizeof(localSock));
-	localSock.sin_family = AF_INET;
-	localSock.sin_port = htons(port);
-	localSock.sin_addr.s_addr = inet_addr(multicast_group);;
-	if(bind(sd, (struct sockaddr*)&localSock, sizeof(localSock)))
-	{
-	perror("Binding datagram socket error");
-	close(sd);
-	exit(1);
-	}
-	else
-	printf("Binding datagram socket...OK.\n");
-
-	group.imr_multiaddr.s_addr = inet_addr(multicast_group);
-	group.imr_interface.s_addr = inet_addr("127.0.0.1");
-	if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
-	{
-	perror("Adding multicast group error");
-	close(sd);
-	exit(1);
-	}
-	else
-	printf("Adding multicast group...OK.\n");
-
-	datalen = sizeof(databuf);
-	while(true){
-		if(read(sd, databuf, datalen) < 0)
-		{
-			perror("Reading datagram message error");
-			close(sd);
-			exit(1);
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol)) == -1) {
+			perror("listener: socket");
+			continue;
 		}
-		else
-		{
+		if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(sockfd);
+			perror("listener: bind");
+			continue;
+		}
 
-			socklen_t len;
-			struct sockaddr_storage addr;
-			char ipstr[INET6_ADDRSTRLEN];
-			int port;
-			getpeername(sd, (struct sockaddr*)&addr, &len);
+		break;
+	}
+	if (p == NULL) {
+		logger()->write("listener: failed to bind socket\n");
+		return;
+	}
 
-			printf("The message from multicast server is: \"%s\"\n", databuf);
+	freeaddrinfo(servinfo);
+	_sockfd=sockfd;
 
-			if (addr.ss_family == AF_INET) {
-			    struct sockaddr_in *s = (struct sockaddr_in *)&addr;
-			    port = ntohs(s->sin_port);
-			    inet_ntop(AF_INET, &s->sin_addr, ipstr, sizeof ipstr);
-			} else { // AF_INET6
-			    struct sockaddr_in6 *s = (struct sockaddr_in6 *)&addr;
-			    port = ntohs(s->sin6_port);
-			    inet_ntop(AF_INET6, &s->sin6_addr, ipstr, sizeof ipstr);
+}
+void Network_UDP::disconnect(){
+	logger()->write("Network Module Disconnect\n");
+	close(_sockfd);
+	_sockfd=-1;
+}
+
+bool Network_UDP::send_message(msg_t type,const char* dest,const char* dest_port,const char* source,const char* source_port,const char* info,const char* info_port){
+
+	char buffer[BUFFER_SIZE];
+	generate_msg(buffer,type,source,source_port,info,info_port);
+
+	int sockfd;
+    struct addrinfo hints, *servinfo, *p;
+    int rv;
+    int numbytes;
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+
+    if ((rv = getaddrinfo(dest, dest_port, &hints, &servinfo)) != 0) {
+        char err[BUFFER_SIZE];
+		sprintf(err, "getaddrinfo: %s\n", gai_strerror(rv));
+		logger()->write(err);
+        return false;
+    }
+
+    // loop through all the results and make a socket
+    for(p = servinfo; p != NULL; p = p->ai_next) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                             p->ai_protocol)) == -1) {
+            perror("talker: socket");
+            continue;
+        }
+
+        break;
+    }
+
+    if (p == NULL) {
+		logger()->write("talker: failed to bind socket\n");
+        return false;
+    }
+
+    if ((numbytes = sendto(sockfd, buffer, BUFFER_SIZE, 0,
+                           p->ai_addr, p->ai_addrlen)) == -1) {
+    	logger()->write("talker: sendto\n");
+        return false;
+    }
+
+    freeaddrinfo(servinfo);
+    close(sockfd);
+    return true;
+}
+
+msg_t Network_UDP::recv_message(char* source,char* source_port,char* info,char* info_port){
+	char buffer[BUFFER_SIZE];
+	int numbytes;
+	struct sockaddr_storage their_addr;
+	socklen_t addr_len;
+	msg_t msgtype=msg_t::UNKNOWN;
+	addr_len = sizeof their_addr;
+	if ((numbytes = recvfrom(_sockfd, buffer, BUFFER_SIZE , 0,
+		(struct sockaddr *)&their_addr, &addr_len)) == -1) {
+		logger()->write("recvfrom\n");
+		return msgtype;
+	}
+	msgtype=get_response(buffer,source,source_port,info,info_port);
+	return msgtype;
+}
+
+void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
+	char buffer[BUFFER_SIZE];
+	char source[30];
+	char info[30];
+	char source_port[30];
+	char info_port[30];
+	source[0]='\0';
+	info[0]='\0';
+	struct sockaddr_storage their_addr;
+	socklen_t addr_len = sizeof their_addr;
+
+	fd_set active_fd_set, read_fd_set;
+
+	FD_ZERO (&active_fd_set);
+  	FD_SET (_sockfd, &active_fd_set);
+  	struct timeval tv;
+  	tv.tv_sec=3;
+	tv.tv_usec=0;
+	int cnt=0;
+  	while(true)
+  	{
+  		read_fd_set = active_fd_set;
+  		int selectStatus=select (FD_SETSIZE, &read_fd_set, NULL, NULL, &tv);
+  		printf("select status %d\n",selectStatus);
+  		if (selectStatus < 0)
+        {
+          logger()->write("FATAL ERROR:SELECT\n");
+          exit (EXIT_FAILURE);
+        }
+        if(selectStatus==0){
+        	break;
+        }
+        cnt++;
+        if(cnt==1) break;
+    	if(FD_ISSET(_sockfd,&read_fd_set)){
+    		std::cout<<"fdisset"<<std::endl;
+			if (int numbytes = recvfrom(_sockfd, buffer, BUFFER_SIZE , 0,
+				(struct sockaddr *)&their_addr, &addr_len) == -1) {
+				perror("recvfrom");
+				exit(EXIT_FAILURE);
 			}
+			std::cout<<buffer<<std::endl;
+			msg_t msgtype=get_response(buffer,source,source_port,info,info_port);
 
-			printf("Peer IP address: %s\n", ipstr);
-
-		}		
-	}
-
+    		
+    		FD_CLR(_sockfd, &read_fd_set);
+    	}
+        
+  	}
 }
 
-void Network_Multicast::multicast(){
 
-	char databuf[1024] = "Multicast test message lol!";
-	int datalen = sizeof(databuf);
 
-	unsigned int port=7000;
-	struct in_addr localInterface;
-	struct sockaddr_in groupSock;
 
-	int sd=socket(AF_INET, SOCK_DGRAM, 0);
-	if(sd < 0)
-	{
-	  perror("Opening datagram socket error");
-	  exit(1);
-	}
-	else
-	  printf("Opening the datagram socket...OK.\n");
-	memset((char *) &groupSock, 0, sizeof(groupSock));
-	groupSock.sin_family = AF_INET;
-	groupSock.sin_addr.s_addr = inet_addr(multicast_group);
-	groupSock.sin_port = htons(port);
-
-	localInterface.s_addr = inet_addr("127.0.0.1");
-
-	if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
-	{
-	  perror("Setting local interface error");
-	  exit(1);
-	}
-	else
-	  printf("Setting the local interface...OK\n");
-
-	if(sendto(sd, databuf, datalen, 0, (struct sockaddr*)&groupSock, sizeof(groupSock)) < 0)
-	{perror("Sending datagram message error");}
-	else
-	  printf("Sending datagram message...OK\n");
-
-}
