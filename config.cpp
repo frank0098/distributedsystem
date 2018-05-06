@@ -1,6 +1,13 @@
 #include "config.h"
 
 
+static Config instance;
+
+Config* get_config(){
+	instance.load();
+	return &instance;
+}
+
 static bool contains(std::string needle,std::string &stack){
 	if(stack.substr(0,needle.size())==needle) return true;
 	return false;
@@ -20,6 +27,7 @@ Config::Config(){
 	_loaded=false;
 }
 void Config::load(){
+	// std::cout<<"la"<<std::endl;
 	if(_loaded) return;
 
 	std::ifstream f;
@@ -31,9 +39,14 @@ void Config::load(){
 				parse(line,peer_ip);
 			}
 		}
-		else if(contains("peer_membership_port",line)){
+		else if(contains("peer_membership_server_port",line)){
 			if(std::getline(f,line)){
-				parse(line,peer_membership_port);
+				parse(line,peer_membership_server_port);
+			}
+		}
+		else if(contains("peer_membership_client_port",line)){
+			if(std::getline(f,line)){
+				parse(line,peer_membership_client_port);
 			}
 		}
 		else if(contains("peer_election_port",line)){

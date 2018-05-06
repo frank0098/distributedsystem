@@ -11,8 +11,10 @@ using std::vector;
 using std::string;
 class Config{
 public:
+	int id;
 	vector<string> peer_ip;
-	vector<string> peer_membership_port;
+	vector<string> peer_membership_server_port;
+	vector<string> peer_membership_client_port;
 	vector<string> peer_election_port;
 	vector<string> file_server_port;
 	void load();
@@ -22,10 +24,6 @@ private:
 	bool _loaded;
 };
 
-static Config* get_config(){
-	static Config instance;
-	instance.load();
-	return &instance;
-}
+Config* get_config();
 
 #endif

@@ -17,10 +17,10 @@ Network::Network(){
 	logger()->write("network module starts");
 }
 
-Network_UDP::Network_UDP(string hostname,unsigned short port):Network()
+Network_UDP::Network_UDP(const char* hostname,const char* port):Network()
 {
-	_hostname=hostname;
-	_port=port;
+	strcpy(_hostname,hostname);
+	strcpy(_port,port);
 }
 void Network_UDP::connect(){
 	int sockfd;
@@ -31,9 +31,9 @@ void Network_UDP::connect(){
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	char portstr[10];
-    sprintf(portstr, "%d", _port);
-	if ((rv = getaddrinfo(NULL,portstr, &hints, &servinfo))!= 0) {
+	// char portstr[10];
+ //    sprintf(portstr, "%d", _port);
+	if ((rv = getaddrinfo(NULL,_port, &hints, &servinfo))!= 0) {
 		char err[BUFFER_SIZE];
 		sprintf(err, "getaddrinfo: %s\n", gai_strerror(rv));
 		logger()->write(err);
@@ -164,18 +164,27 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
         if(selectStatus==0){
         	break;
         }
-        cnt++;
-        if(cnt==1) break;
     	if(FD_ISSET(_sockfd,&read_fd_set)){
-    		std::cout<<"fdisset"<<std::endl;
+    		// std::cout<<"fdisset"<<std::endl;
 			if (int numbytes = recvfrom(_sockfd, buffer, BUFFER_SIZE , 0,
 				(struct sockaddr *)&their_addr, &addr_len) == -1) {
-				perror("recvfrom");
+				// perror("recvfrom");
+				logger()->write("recvfrom");
 				exit(EXIT_FAILURE);
 			}
-			std::cout<<buffer<<std::endl;
+			// std::cout<<buffer<<std::endl;
 			msg_t msgtype=get_response(buffer,source,source_port,info,info_port);
-
+			if(msgtype==msg_t::ACK){
+				for(auto &p:input){
+					if(strcmp(source,p.peerip)==0 && strcmp(source_port,p.peerport)==0){
+						p.suspicious=false;
+						break;
+					}
+				}
+			}
+			else{
+				logger()->write("BUG:Unexpected msg: "+std::to_string(msgtype));
+			}
     		
     		FD_CLR(_sockfd, &read_fd_set);
     	}

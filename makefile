@@ -7,11 +7,16 @@ CFLAGS = -c -std=c++11
 
 all: server
 
-server: network_manager.o server.o logger.o
-	$(CC) -pthread network_manager.o server.o logger.o -o server.out
+server: network_manager.o server.o logger.o membership.o config.o
+	$(CC) -pthread network_manager.o server.o logger.o config.o membership.o -o server.out
 
-server.o: network_manager.o
+
+
+server.o:
 	$(CC) $(CFLAGS) server.cpp
+
+membership.o: 
+	$(CC) $(CFLAGS) membership.cpp
 
 network_manager.o:
 	$(CC) $(CFLAGS) network_manager.cpp 
@@ -20,7 +25,8 @@ network_manager.o:
 logger.o:
 	$(CC) $(CFLAGS) logger.cpp 
 
-
+config.o:
+	$(CC) $(CFLAGS) config.cpp
 
 clean:
 	rm -f *.o *.out
