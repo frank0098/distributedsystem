@@ -1,0 +1,3 @@
+iperf -s -u -B 224.1.1.1 -i 1 -start a multicast server
+generate multicast server
+https://taosecurity.blogspot.com/2006/09/generating-multicast-traffic.html

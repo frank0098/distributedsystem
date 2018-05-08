@@ -21,6 +21,7 @@ public:
 
 	void start();
 	void stop();
+	~Membership();
 private:
 	void run_membership_server();
 	void run_membership_client();

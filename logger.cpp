@@ -42,7 +42,7 @@ void Logger::stop(){
 }
 void Logger::write(std::string content){
 	if(_started){
-		cout<<"write"<<content<<endl;
+		cout<<"[LOG] "<<content<<endl;
 		std::lock_guard<std::mutex> lg(_write_lock);
 		_log_stream<<"["<<currentDateTime()<<"] " << content<<endl;
 	}

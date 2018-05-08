@@ -17,6 +17,7 @@ public:
   void stop(){
     std::unique_lock<std::mutex> l(_m);
     _running=false;
+    _cv.notify_one();
   }
   void block(){
     std::unique_lock<std::mutex> l(_m);
@@ -25,6 +26,7 @@ public:
   void unblock(){
     std::unique_lock<std::mutex> l(_m);
     _blocked=false;
+    _cv.notify_one();
   }
 
   void push(const T& item){
@@ -39,20 +41,23 @@ public:
   }
   void wait_and_pop(T& value){
     std::unique_lock<std::mutex> l(_m);
-    _cv.wait(l,[this]{return !_q.empty()||!_running||!_blocked;});
+    _cv.wait(l,[this]{return !_running||(!_q.empty()&&!_blocked);});
+    if(!_running) return;
     value=_q.front();
     _q.pop();
   }
   std::shared_ptr<T> wait_and_pop(){
     std::unique_lock<std::mutex> l(_m);
-    _cv.wait(l,[this]{return !_q.empty()||!_running||!_blocked;});
+     _cv.wait(l,[this]{return !_running||(!_q.empty()&&!_blocked);});
+    if(!_running) return;
     std::shared_ptr<T> ret=std::make_shared<T>(_q.front());
     _q.pop();
     return ret;
   }
   T wait_and_pop_raw(){
     std::unique_lock<std::mutex> l(_m);
-    _cv.wait(l,[this]{return !_q.empty()||!_running||!_blocked;});
+     _cv.wait(l,[this]{return !_running||(!_q.empty()&&!_blocked);});
+    if(!_running) return;
     auto ret=std::move(_q.front());
     _q.pop();
     return std::move(ret);

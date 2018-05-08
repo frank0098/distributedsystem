@@ -2,7 +2,7 @@
 
 #define BUFFER_SIZE 256
 
-static const char *format = "FailureDetector/1.0 \r\nMsg sent is %c\r\nSource %s:%s\r\nAdditional info %s:%s\r\n\r\n";
+static const char *format = "FailureDetector/1.0 \r\nMsg sent is %c\r\nSource %s\r\nSourceport %s\r\nExtra1%s\r\nExtra2%s\r\n\r\n";
 
 static void generate_msg(char* msg,msg_t msgtype,const char* source,const char* source_port,const char* info,const char* info_port){
 	msg[0]='\0';
@@ -23,6 +23,7 @@ Network_UDP::Network_UDP(const char* hostname,const char* port):Network()
 	strcpy(_port,port);
 }
 void Network_UDP::connect(){
+	if(_sockfd>0) return;
 	int sockfd;
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
@@ -63,6 +64,7 @@ void Network_UDP::connect(){
 
 }
 void Network_UDP::disconnect(){
+	if(_sockfd<0) return;
 	logger()->write("Network Module Disconnect\n");
 	close(_sockfd);
 	_sockfd=-1;
@@ -117,6 +119,7 @@ bool Network_UDP::send_message(msg_t type,const char* dest,const char* dest_port
 }
 
 msg_t Network_UDP::recv_message(char* source,char* source_port,char* info,char* info_port){
+	if(_sockfd<0) return msg_t::UNKNOWN;
 	char buffer[BUFFER_SIZE];
 	int numbytes;
 	struct sockaddr_storage their_addr;
@@ -128,11 +131,14 @@ msg_t Network_UDP::recv_message(char* source,char* source_port,char* info,char* 
 		logger()->write("recvfrom\n");
 		return msgtype;
 	}
+	// cout<<"buff"<<buffer<<endl;
 	msgtype=get_response(buffer,source,source_port,info,info_port);
+	
 	return msgtype;
 }
 
 void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
+	if(_sockfd<0) return;
 	char buffer[BUFFER_SIZE];
 	char source[30];
 	char info[30];
@@ -155,25 +161,28 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
   	{
   		read_fd_set = active_fd_set;
   		int selectStatus=select (FD_SETSIZE, &read_fd_set, NULL, NULL, &tv);
-  		printf("select status %d\n",selectStatus);
+  		//printf("select status %d\n",selectStatus);
   		if (selectStatus < 0)
         {
           logger()->write("FATAL ERROR:SELECT\n");
-          exit (EXIT_FAILURE);
+          break;
+          // exit (EXIT_FAILURE);
         }
         if(selectStatus==0){
+        	// printf("select timeout \n");
         	break;
         }
     	if(FD_ISSET(_sockfd,&read_fd_set)){
-    		// std::cout<<"fdisset"<<std::endl;
 			if (int numbytes = recvfrom(_sockfd, buffer, BUFFER_SIZE , 0,
 				(struct sockaddr *)&their_addr, &addr_len) == -1) {
 				// perror("recvfrom");
-				logger()->write("recvfrom");
-				exit(EXIT_FAILURE);
+				logger()->write("recvfromerr");
+				break;
+				// exit(EXIT_FAILURE);
 			}
-			// std::cout<<buffer<<std::endl;
 			msg_t msgtype=get_response(buffer,source,source_port,info,info_port);
+
+			// cout<<"RECVMESSAGE: "<<buffer<<endl;
 			if(msgtype==msg_t::ACK){
 				for(auto &p:input){
 					if(strcmp(source,p.peerip)==0 && strcmp(source_port,p.peerport)==0){
@@ -183,7 +192,7 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
 				}
 			}
 			else{
-				logger()->write("BUG:Unexpected msg: "+std::to_string(msgtype));
+				logger()->write("BUG:Unexpected msg: "+std::to_string(msgtype-'a'));
 			}
     		
     		FD_CLR(_sockfd, &read_fd_set);

@@ -6,7 +6,22 @@
 #include <thread>
 #include <vector>
 #include <iostream>
+
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+
 using std::vector;
+
+
+	Membership m;
+bool running=true;
+void my_handler(int s){
+		running=false;
+       m.stop();
+
+}
 
 int main(int argc,char** argv){
 	if(argc!=2){
@@ -17,9 +32,19 @@ int main(int argc,char** argv){
 	initialize_log(id);
 	Config* conf=get_config();
 	conf->id=id;
-	Membership m;
+
+	//signal for control c
+	struct sigaction sigIntHandler;
+
+   sigIntHandler.sa_handler = my_handler;
+   sigemptyset(&sigIntHandler.sa_mask);
+   sigIntHandler.sa_flags = 0;
+
+   sigaction(SIGINT, &sigIntHandler, NULL);
+
+
 	m.start();
-	while(true){
+	while(running){
 		
 	}
 

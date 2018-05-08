@@ -55,7 +55,39 @@ struct Work_item{
 	char dest_port[PORT_LENGTH];
 	char additional_ip[IP_LENGTH];
 	char additional_port[PORT_LENGTH];
+	Work_item(){
+		type=msg_t::UNKNOWN;
+	}
+	Work_item(msg_t	type_,const char* dest_ip_,const char* dest_port_,const char* source_ip_,const char* source_port_,const char* additional_ip_,const char* additional_port_){
+			type=type_;
+			strcpy(dest_ip,dest_ip_);
+			strcpy(dest_port,dest_port_);
+			strcpy(source_ip,source_ip_);
+			strcpy(source_port,source_port_);
+			strcpy(additional_ip,additional_ip_);
+			strcpy(additional_port,additional_port_);
+	}
+	Work_item& operator=(const Work_item& rhs){
+		if(this!=&rhs){
+			type=rhs.type;
+			strcpy(source_ip,rhs.source_ip);
+			strcpy(source_port,rhs.source_port);
+			strcpy(dest_ip,rhs.dest_ip);
+			strcpy(dest_port,rhs.dest_port);
+			strcpy(additional_ip,rhs.additional_ip);
+			strcpy(additional_port,rhs.additional_port);
+		}
+		return *this;
+	}
+
+	void print(){
+		cout<<"type"<<type-'a'<<"item: source:"<<source_ip<<" "<<source_port
+		<<" dest:"<<dest_ip<<" "<<dest_port
+		<<" "<<additional_ip<<" "<<additional_port<<endl;
+	}
 };
+
+
 class Network{
 public:
 	Network();
