@@ -2,6 +2,7 @@
 #include "logger.h"
 #include "config.h"
 #include "membership.h"
+#include "file_server.h"
 
 #include <thread>
 #include <vector>
@@ -44,6 +45,7 @@ int main(int argc,char** argv){
 
 
 	m.start();
+	File_server fs;
 	while(running){
 		
 	}

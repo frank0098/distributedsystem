@@ -49,9 +49,14 @@ void Config::load(){
 				parse(line,peer_membership_client_port);
 			}
 		}
-		else if(contains("peer_election_port",line)){
+		else if(contains("election_server_port",line)){
 			if(std::getline(f,line)){
-				parse(line,peer_election_port);
+				parse(line,election_server_port);
+			}
+		}
+		else if(contains("election_client_port",line)){
+			if(std::getline(f,line)){
+				parse(line,election_client_port);
 			}
 		}
 		else if(contains("file_server_port",line)){
@@ -59,7 +64,11 @@ void Config::load(){
 				parse(line,file_server_port);
 			}
 		}
-
+		else if(contains("fs_path",line)){
+			if(std::getline(f,line)){
+				fs_path=line;
+			}
+		}
 
 	}
 	_loaded=true;

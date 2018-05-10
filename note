@@ -1,3 +1,102 @@
 iperf -s -u -B 224.1.1.1 -i 1 -start a multicast server
 generate multicast server
 https://taosecurity.blogspot.com/2006/09/generating-multicast-traffic.html
+
+
+
+file server
+put/get/delete/
+ls/store
+
+fs_client
+
+-func
+find_leader
+send_request
+
+fs_server
+-api
+bool exist(filename)
+string list_file()
+STRING get_file(filename)
+bool upload_file(filename,STRING)
+bool delete_file(filename)
+void mark_delete(filename)
+
+map<string FILENAME,Meta Format>
+Meta Format:
+string filename
+string date
+string path
+bool available
+
+file_manager
+fs_server
+int exist(filename)
+	get_id_of_3 replicas
+	if any true->return id
+	return -1
+string list_file(machine id)
+	return fs_server[id].list_file
+string list_file_all()
+	for x:fs_server
+		ret+=fs_server[id].list_file
+	return ret
+STRING get_file(id,filename)
+	return fs_server[id].get_file(filename)
+bool upload_file(filename,STRING)
+	get_id_of_3 relicas
+	choose 1 replica id->fs_server[id].upload_file(filename,STRING)
+	start_worker copy file to other server
+	return true
+void delete_file(filename)
+	get_id of 3 repicas
+	for id:
+	fs_server[id].mark_delete(filename)
+	start_worker delete file on other server
+	return true
+
+
+election protocol
+	state_manager: leader
+					peers
+					id
+	server:
+		bool in_election_process
+		while(_run)
+			recv_message(msg)
+			if(msg==ELECTION && !in_election_process)
+				reply ok
+				start_election()
+			if(msg==COORDNATOR)
+				leader==
+	start_election()
+		leader==NULL
+		in_election_process=true
+		if id is highest
+			leaderid==id
+			send COORDINATOR to other peers
+		else
+			send ELECTION to peers with higher id
+			wait_til_timeout
+			if no_answer:
+				leader_id=id
+				send COORDINATOR to other peers with lower id
+			else:
+				wait_til_timeout 
+				if LEADER==NULL
+					start_election
+
+		in_election_process=false
+
+
+
+
+
+
+
+
+
+
+
+
