@@ -5,33 +5,40 @@
 using std::string;
 class Node{
 public:
+	bool available;
 	unsigned int peer_id;
 	string peer_ip;
-	unsigned short membership_port;
-	unsigned short election_port;
+	// unsigned short membership_port;
+	unsigned short election_server_port;
+	unsigned short election_client_port;
 	unsigned short file_server_port;
-	MSGPACK_DEFINE(peer_id,peer_ip,membership_port,election_port,file_server_port)
-	Node(unsigned int peerid_,string peer_ip_,string membership_port_,string election_port_,string file_server_port_){
+	unsigned short file_manager_port;
+	// MSGPACK_DEFINE(peer_id,peer_ip,election_port,file_server_port);
+	Node(unsigned int peer_id_,string peer_ip_,string election_server_port_,string election_client_port_,string file_server_port_,string file_manager_port_){
 		peer_id=peer_id_;
 		peer_ip=peer_ip_;
-		membership_port=std::stoi(membership_port_);
-		election_port=std::stoi(election_port_);
+		election_server_port=std::stoi(election_server_port_);
+		election_client_port=std::stoi(election_client_port_);
 		file_server_port=std::stoi(file_server_port_);
+		file_manager_port=std::stoi(file_manager_port_);
+		available=false;
 	}
 	Node(const Node& other){
-		peer_id=other.peer_id;
-		peer_ip=other.peer_ip;
-		membership_port=other.membership_port;
-		election_port=other.election_port;
-		file_server_port=other.file_server_port;
+		// peer_id=other.peer_id;
+		// peer_ip=other.peer_ip;
+		// // membership_port=other.membership_port;
+		// election_port=other.election_port;
+		// file_server_port=other.file_server_port;
+		// file_manager_port=other.file_manager_port;
 	}
 	Node& operator=(const Node& other){
 		if(this!=&other){
-			peer_id=other.peer_id;
-			peer_ip=other.peer_ip;
-			membership_port=other.membership_port;
-			election_port=other.election_port;
-			file_server_port=other.file_server_port;
+			// peer_id=other.peer_id;
+			// peer_ip=other.peer_ip;
+			// // membership_port=other.membership_port;
+			// election_port=other.election_port;
+			// file_server_port=other.file_server_port;
+			// file_manager_port=other.file_manager_port;
 		}
 		return *this;
 	}

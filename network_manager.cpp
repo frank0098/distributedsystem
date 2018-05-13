@@ -200,7 +200,19 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
         
   	}
 }
+Network_RPC::Network_RPC(const char* hostname,const char* port):Network()
+{
+	strcpy(_hostname,hostname);
+	strcpy(_port,port);
+}
 
+void Network_RPC::connect(){
+	_rpc_server->run();
+}
+
+void Network_RPC::disconnect(){
+	_rpc_server->stop();
+}
 
 
 

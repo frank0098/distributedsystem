@@ -90,11 +90,15 @@ election protocol
 		in_election_process=false
 
 
+sublime key
+control + #number jump to split window
+control + shift + #number move file to group				
+command + #number jump to tabs
+control + tab/ cycle to lasttab
 
-
-
-
-
+option + command +up go to header.source
+option + command + left/right  swith tabs
+OR command shift + []
 
 
 

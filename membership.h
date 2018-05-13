@@ -3,7 +3,6 @@
 
 #include "network_manager.h"
 #include "logger.h"
-#include "queue.hpp"
 #include "config.h"
 
 

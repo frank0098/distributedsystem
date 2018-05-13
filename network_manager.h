@@ -2,6 +2,9 @@
 #define NETWORK_MANAGER_H
 
 
+
+#include "rpc/client.h"
+#include "rpc/server.h"
 #include "logger.h"
 
 #include <string>
@@ -17,12 +20,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
+#include <exception>
+#include <memory>
 
 using std::string;
 using std::vector;
 
 
 #define SLEEP_INTERVAL 2
+#define RPC_TIMEOUT 2
 
 #define IP_LENGTH 30
 #define PORT_LENGTH 6
@@ -34,7 +40,6 @@ struct Peer_struct{
 	int id;
 	char peerip[IP_LENGTH];
 	char peerport[PORT_LENGTH];
-	// bool alive=false;
 	bool suspicious=false;
 };
 enum msg_t {
@@ -94,7 +99,6 @@ public:
 	virtual void connect()=0;
 	virtual void disconnect()=0;
 protected:
-	int _sockfd=-1;
 	char _hostname[IP_LENGTH];
 	char _port[PORT_LENGTH];
 };
@@ -108,6 +112,29 @@ public:
 	void connect();
 	void disconnect();
 private:
+	int _sockfd=-1;
+};
+
+class Network_RPC:public Network{
+public:
+	
+	Network_RPC(const char* hostname,const char* port);
+	void connect();
+	void disconnect();
+	
+	template <typename Arg>
+	void bind(string fname,Arg args){
+		_rpc_server->bind(fname,args);
+	}
+	template <typename... Arg>
+	static RPCLIB_MSGPACK::object_handle call_rpc(string ip_addr,unsigned short port,string function_name,Arg... args){
+
+		rpc::client client(ip_addr,port);
+		client.set_timeout(RPC_TIMEOUT);
+		auto handle = client.call(function_name,std::forward<Arg>(args)...);
+		return handle;
+	}
+	std::unique_ptr<rpc::server> _rpc_server;
 };
 
 

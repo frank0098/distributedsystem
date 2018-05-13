@@ -9,6 +9,8 @@
 #include <vector>
 
 
+#include "queue.hpp"
+
 using std::vector;
 using std::string;
 class Config{
@@ -20,6 +22,7 @@ public:
 	vector<string> election_server_port;
 	vector<string> election_client_port;
 	vector<string> file_server_port;
+	vector<string> file_manager_port;
 	string fs_path;
 	void load();
 	Config();
