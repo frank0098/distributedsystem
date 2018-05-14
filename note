@@ -100,6 +100,9 @@ option + command +up go to header.source
 option + command + left/right  swith tabs
 OR command shift + []
 
+fn+up/down move page up/down
+fn+left/down move page to top/bot
+option + control up/down move up/down one line
 
 
 

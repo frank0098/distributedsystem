@@ -64,6 +64,11 @@ void Config::load(){
 				parse(line,file_server_port);
 			}
 		}
+		else if(contains("file_manager_port",line)){
+			if(std::getline(f,line)){
+				parse(line,file_manager_port);
+			}
+		}
 		else if(contains("fs_path",line)){
 			if(std::getline(f,line)){
 				fs_path=line;

@@ -8,19 +8,21 @@
 #include "file_server.h"
 
 #include <string>
+#include <exception>
 
 
 using std::string;
 using std::vector;
 class File_manager{
 public:
+	File_manager(State_manager* sm);
 	~File_manager();
 	void start();
 	void stop();
 private:
 
 	bool rpc_if_exist(string filename);
-	vector<string> rpc_list_file();
+	string rpc_list_file();
 	vector<vector<string>> rpc_list_all_files();
 	// pair<string,string> rpc_download_file_addr(string filename);
 	string rpc_download_file(string filename);
@@ -29,7 +31,7 @@ private:
 	void rpc_mark_delete(string filename);
 
 	bool _running;
-	File_server fs;
+	File_server* _fs;
 	State_manager* _sm;
 	int _size;
 	int _id;

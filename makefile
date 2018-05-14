@@ -5,10 +5,16 @@ CFLAGS = -c -std=c++14
 
 .PHONY: all clean
 
-all: server
+all: server dfs_client
 
-server: network_manager.o server.o logger.o membership.o config.o file_server.o file_manager.o
-	$(CC) -pthread network_manager.o server.o logger.o config.o membership.o file_server.o file_manager.o librpc.a -o server.out
+dfs_client: network_manager.o dfs_client.o logger.o config.o file_manager.o file_server.o simple_json.o
+	$(CC) network_manager.o dfs_client.o logger.o config.o file_manager.o file_server.o librpc.a simple_json.o -o client.out
+
+server: network_manager.o server.o logger.o membership.o config.o file_server.o file_manager.o simple_json.o
+	$(CC) -pthread network_manager.o server.o logger.o config.o membership.o file_server.o file_manager.o simple_json.o librpc.a -o server.out
+
+dfs_client.o:
+	$(CC) $(CFLAGS)  -I./  dfs_client.cpp
 
 server.o:
 	$(CC) $(CFLAGS)  -I./  server.cpp
@@ -30,6 +36,9 @@ logger.o:
 
 config.o:
 	$(CC) $(CFLAGS) config.cpp
+
+simple_json.o:
+	$(CC) $(CFLAGS) simple_json.cpp
 
 clean:
 	rm -f *.o *.out

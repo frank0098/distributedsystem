@@ -24,23 +24,23 @@ public:
 		available=false;
 	}
 	Node(const Node& other){
-		// peer_id=other.peer_id;
-		// peer_ip=other.peer_ip;
-		// // membership_port=other.membership_port;
-		// election_port=other.election_port;
-		// file_server_port=other.file_server_port;
-		// file_manager_port=other.file_manager_port;
+		copy(other);
 	}
 	Node& operator=(const Node& other){
 		if(this!=&other){
-			// peer_id=other.peer_id;
-			// peer_ip=other.peer_ip;
-			// // membership_port=other.membership_port;
-			// election_port=other.election_port;
-			// file_server_port=other.file_server_port;
-			// file_manager_port=other.file_manager_port;
+			copy(other);
 		}
 		return *this;
+	}
+	void copy(const Node& other){
+		peer_id=other.peer_id;
+		peer_ip=other.peer_ip;
+		election_server_port=other.election_server_port;
+		election_client_port=other.election_client_port;
+		file_server_port=other.file_server_port;
+		file_server_port=other.file_server_port;
+		file_server_port=other.file_server_port;
+		file_manager_port=other.file_manager_port;
 	}
 };
 

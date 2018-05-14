@@ -28,7 +28,7 @@ using std::vector;
 
 
 #define SLEEP_INTERVAL 2
-#define RPC_TIMEOUT 2
+#define RPC_TIMEOUT 2000
 
 #define IP_LENGTH 30
 #define PORT_LENGTH 6
@@ -124,6 +124,7 @@ public:
 	
 	template <typename Arg>
 	void bind(string fname,Arg args){
+		if(_rpc_server)
 		_rpc_server->bind(fname,args);
 	}
 	template <typename... Arg>

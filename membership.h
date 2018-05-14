@@ -2,6 +2,7 @@
 #define MEMBERSHIP_H
 
 #include "network_manager.h"
+#include "state_manager.h"
 #include "logger.h"
 #include "config.h"
 
@@ -17,7 +18,7 @@ using std::endl;
 //SWIM Infection-style Dissemination
 class Membership{
 public:
-
+	Membership(State_manager* sm);
 	void start();
 	void stop();
 	~Membership();
@@ -30,17 +31,20 @@ private:
 	char _hostname[IP_LENGTH];
 	char _m_server_port[PORT_LENGTH];
 	char _m_client_port[PORT_LENGTH];
+
 	vector<Peer_struct> _peers_v;
 	std::mutex _m;
-	bool _running;
 	Network_UDP* _nw_server;
 	Network_UDP* _nw_client;
-	int _id;
+	State_manager* _sm;
 	Queue<Work_item> _q;
 	std::thread _worker_send_message;
 	std::thread _worker_server;
 	std::thread _worker_client;
 	// bool peer_map[MAX_MEMBERS];
+	
+	int _id;
+	bool _running;
 
 
 

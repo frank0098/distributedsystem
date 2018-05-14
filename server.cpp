@@ -2,7 +2,7 @@
 #include "logger.h"
 #include "config.h"
 #include "membership.h"
-#include "file_server.h"
+#include "file_manager.h"
 
 #include <thread>
 #include <vector>
@@ -16,13 +16,12 @@
 using std::vector;
 
 
-	Membership m;
-bool running=true;
-void my_handler(int s){
-		running=false;
-       m.stop();
 
-}
+// void my_handler(int s){
+// 		running=false;
+//        m.stop();
+
+// }
 
 int main(int argc,char** argv){
 	if(argc!=2){
@@ -32,20 +31,27 @@ int main(int argc,char** argv){
 	int id=atoi(argv[1]);
 	initialize_log(id);
 	Config* conf=get_config();
+	State_manager sm;
 	conf->id=id;
 
 	//signal for control c
-	struct sigaction sigIntHandler;
+	// struct sigaction sigIntHandler;
 
-   sigIntHandler.sa_handler = my_handler;
-   sigemptyset(&sigIntHandler.sa_mask);
-   sigIntHandler.sa_flags = 0;
+ //   sigIntHandler.sa_handler = my_handler;
+ //   sigemptyset(&sigIntHandler.sa_mask);
+ //   sigIntHandler.sa_flags = 0;
 
-   sigaction(SIGINT, &sigIntHandler, NULL);
+ //   sigaction(SIGINT, &sigIntHandler, NULL);
+
+	Membership m(&sm);
+	bool running=true;
+	File_manager fm(&sm);
+
 
 
 	m.start();
-	File_server fs;
+	fm.start();
+	// File_server fs;
 	while(running){
 		
 	}

@@ -204,6 +204,7 @@ Network_RPC::Network_RPC(const char* hostname,const char* port):Network()
 {
 	strcpy(_hostname,hostname);
 	strcpy(_port,port);
+	_rpc_server=std::make_unique<rpc::server>(_hostname,atoi(_port));
 }
 
 void Network_RPC::connect(){

@@ -1,5 +1,9 @@
 #include "membership.h"
 
+
+Membership::Membership(State_manager* sm):_sm(sm),_nw_client(nullptr),_nw_server(nullptr){
+
+}
 Membership::~Membership(){
 
 	if(_worker_server.joinable()){
@@ -13,6 +17,7 @@ Membership::~Membership(){
 		_worker_send_message.join();
 	}
 }
+
 void Membership::start(){
 	//load conf
 	Config* conf=get_config();
@@ -152,7 +157,7 @@ void Membership::run_membership_client(){
 			outputstr+="; ";
 		}
 		// cout<<"3"<<endl;
-		logger()->write(outputstr);
+		// logger()->write(outputstr);
 		_q.block();
 		for(auto &p:_peers_v){
 			p.suspicious=true;
@@ -167,9 +172,9 @@ void Membership::run_membership_client(){
 			std::lock_guard<std::mutex> lg(_m);
 			peers_copy=_peers_v;
 		}
-		cout<<"4"<<endl;
+		// cout<<"4"<<endl;
 		_nw_client->wait_message_from_peers(peers_copy);
-		cout<<"5"<<endl;
+		// cout<<"5"<<endl;
 		// cout<<peers_copy.size()<<endl;
 		vector<Peer_struct> suspicious_peers;
 		vector<Peer_struct> not_suspicious_peers;
@@ -182,7 +187,7 @@ void Membership::run_membership_client(){
 				not_suspicious_peers.push_back(p);
 			}
 		}
-		logger()->write("suspicious member cnt: "+std::to_string(suspicious_peers.size()));
+		// logger()->write("suspicious member cnt: "+std::to_string(suspicious_peers.size()));
 		// cout<<suspicious_peers.size()<<endl;
 		if(suspicious_peers.size()>0){
 			
@@ -210,6 +215,8 @@ void Membership::run_membership_client(){
 	cout<<"end2"<<endl;
 }
 void Membership::add_member(const char* source,const char* port,int id){
+
+
 	// cout<<"addmembercalled"<<source<<port<<id<<endl;
 	for(auto &p:_peers_v){
 		string sourcestr(source);
@@ -217,6 +224,9 @@ void Membership::add_member(const char* source,const char* port,int id){
 		logger()->write(" add member: ip"+sourcestr+" "+portstr+" id"+std::to_string(id));
 		if(p.id==id) return;
 	}
+
+	_sm->set_alive(id);
+
 	Peer_struct p;
 	p.id=id;
 	strcpy(p.peerip,source);
@@ -225,6 +235,7 @@ void Membership::add_member(const char* source,const char* port,int id){
 		std::lock_guard<std::mutex> lg(_m);
 		_peers_v.push_back(p);
 	}
+
 	string outputstr="membership: successfully add ";
 	outputstr+=p.peerip;
 	outputstr+=" ";
@@ -245,6 +256,9 @@ void Membership::remove_member(int id){
 		}
 	}
 	if(idx<0) return;
+
+	_sm->set_dead(id);
+
 	Peer_struct& p=_peers_v[idx];
 	string outputstr="membership: successfully remove ";
 	outputstr+=p.peerip;
