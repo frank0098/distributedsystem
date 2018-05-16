@@ -22,7 +22,7 @@ public:
 private:
 
 	bool rpc_if_exist(string filename);
-	string rpc_list_file();
+	vector<string> rpc_list_file();
 	vector<vector<string>> rpc_list_all_files();
 	// pair<string,string> rpc_download_file_addr(string filename);
 	string rpc_download_file(string filename);

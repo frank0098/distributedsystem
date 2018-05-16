@@ -27,7 +27,7 @@ Config::Config(){
 	_loaded=false;
 }
 void Config::load(){
-	// std::cout<<"la"<<std::endl;
+	// std::std::cout<<"la"<<std::std::endl;
 	if(_loaded) return;
 
 	std::ifstream f;
@@ -75,6 +75,31 @@ void Config::load(){
 			}
 		}
 
+	}
+	int size=peer_ip.size();
+	if(size!=peer_membership_server_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if(size!=peer_membership_client_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if(size!=election_server_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if(size!=election_client_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if(size!=file_server_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+	if(size!=file_manager_port.size()){
+		std::cout<<"error in config"<<std::endl;
+		exit(EXIT_FAILURE);
 	}
 	_loaded=true;
 }

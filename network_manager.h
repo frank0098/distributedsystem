@@ -28,7 +28,7 @@ using std::vector;
 
 
 #define SLEEP_INTERVAL 2
-#define RPC_TIMEOUT 2000
+#define RPC_TIMEOUT 3000
 
 #define IP_LENGTH 30
 #define PORT_LENGTH 6

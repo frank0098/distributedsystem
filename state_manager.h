@@ -15,7 +15,7 @@ public:
 		_size=conf->peer_ip.size();
 		_self_id=conf->id;
 		for(int i=0;i<_size;i++){
-			Node node(i,conf->peer_ip[i],conf->file_server_port[i],conf->election_server_port[i],conf->election_client_port[i],conf->file_manager_port[i]);
+			Node node(i,conf->peer_ip[i],conf->election_server_port[i],conf->election_client_port[i],conf->file_server_port[i],conf->file_manager_port[i]);
 			_peers.push_back(node);
 		}
 		_peers[_self_id].available=true;

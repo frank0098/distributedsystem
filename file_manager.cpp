@@ -21,6 +21,7 @@ File_manager::File_manager(State_manager* sm):_running(false),_sm(sm),_nw(nullpt
 	_id=conf->id;
 	string hostname=conf->peer_ip[conf->id];
 	string file_manager_port=conf->file_manager_port[conf->id];
+	// cout<<"here"<<hostname<<" "<<file_manager_port<<" "<<conf->id<<endl;
 	_nw=new Network_RPC(hostname.c_str(),file_manager_port.c_str());
 	_fs=new File_server(sm);
 
@@ -55,7 +56,7 @@ void File_manager::start(){
 		this->rpc_delete_file(filename);
 	});
 	_nw->bind("list_file",[&](){
-		this->rpc_list_file();
+		return this->rpc_list_file();
 	});
 	_nw->bind("mark_delete",[&](string filename){
 		this->rpc_delete_file(filename);
@@ -66,6 +67,7 @@ void File_manager::start(){
 			
 		}
 	});
+	logger()->write("file_manager: start successfully");
 }
 void File_manager::stop(){
 	_fs->stop();
@@ -89,9 +91,22 @@ static bool id_in_range(int first_replica,int size){
 	return false;
 }
 
-string File_manager::rpc_list_file(){
-	cout<<"called!"<<endl;
-	return "cnmlgcb";
+vector<string> File_manager::rpc_list_file(){
+	//todo:find leader and then list file
+	int self_id=get_config()->id;
+	vector<string> ret;
+	Node node=_sm->get_peer(self_id);
+	try{
+		ret= Network_RPC::call_rpc(node.peer_ip,node.file_server_port,"rpc_list_file").as<vector<string>>();
+	}
+	catch(std::runtime_error ex){
+		std::cout<<"whaterror err"<<ex.what()<<std::endl;
+	}
+	catch(std::exception ex){
+		std::cout<<"rpclistfile err"<<ex.what()<<std::endl;
+	}
+	return ret;
+
 	// return _fs->rpc_list_file();
 }
 bool File_manager::rpc_if_exist(string filename){
@@ -152,7 +167,7 @@ bool File_manager::rpc_upload_file(string filename,string content){
 		if(_sm->alive((_id+i)%cnt)){
 			Node node=_sm->get_peer((_id+i)%cnt);
 			try{
-				Network_RPC::call_rpc(node.peer_ip,node.file_server_port,"upload_file",filename,content,true);
+				return Network_RPC::call_rpc(node.peer_ip,node.file_server_port,"upload_file",filename,content,true).as<bool>();
 				break;
 			}
 			catch(...){

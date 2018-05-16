@@ -10,7 +10,7 @@
 #include "state_manager.h"
 #include "simple_json.h"
 
-
+#include <sys/stat.h>
 #include <string>
 #include <vector>
 #include <mutex>
@@ -41,7 +41,7 @@ public:
 	~File_server();
 private:
 	bool rpc_if_exist(string filename);
-	string rpc_list_file();
+	vector<string> rpc_list_file();
 	string rpc_download_file(string filename);
 	bool rpc_upload_file(string filename,string content,bool iffromclient);
 	void rpc_delete_file(string filename);

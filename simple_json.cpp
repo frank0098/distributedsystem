@@ -101,7 +101,7 @@ Json Json_parser::decode(string str){
 		int l=1;
 		int r=l;
 		while(l<str.size()){
-			if(str[r]=='[' or str[r]=='{'){
+			if(r<str.size() && (str[r]=='[' || str[r]=='{')){
 				stack<char> stk;
 				stk.push(str[r]);
 				while(r<str.size() and !stk.empty()){
@@ -112,11 +112,12 @@ Json Json_parser::decode(string str){
 						stk.pop();
 				}
 				v.push_back(decode(str.substr(l,r-l+1)));
+				if(str[r]==']')break;
 				l=r+2;
 				r=l;
 			}
 			else{
-				while(!(str[r]==',' or str[r]==']')) r++;
+				while(r<str.size() && !(str[r]==',' or str[r]==']')) r++;
 				v.push_back(decode(str.substr(l,r-l)));
 				if(str[r]==']')break;
 				l=r+1;
@@ -130,10 +131,13 @@ Json Json_parser::decode(string str){
 		int l=1;
 		int r=l;
 		while(l<str.size()){
-			while(str[r]!=':') r++;
+			while(r<str.size() && str[r]!=':'){ 
+				r++;
+			}
 			string key=str.substr(l+1,r-l-2);
 			l=r+1;
 			r=l;
+			if(r>=str.size()) break;
 			if(str[r]=='[' or str[r]=='{'){
 				stack<char> stk;
 				stk.push(str[r]);
@@ -144,11 +148,14 @@ Json Json_parser::decode(string str){
 					else if(str[r]=='}' and stk.top()=='{')stk.pop();
 				}
 				m[key]=decode(str.substr(l,r-l+1));
+				if(str[r]=='}') break;
 				l=r+2;
 				r=l;
 			}	
 			else{
-				while(!(str[r]==',' or str[r]=='}')) r++;
+				while(r<str.size() && !(str[r]==',' or str[r]=='}')){
+					r++;
+				}
 				m[key]=decode(str.substr(l,r-l));
 				if(str[r]=='}') break;
 				l=r+1;

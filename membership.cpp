@@ -20,6 +20,7 @@ Membership::~Membership(){
 
 void Membership::start(){
 	//load conf
+	logger()->write("membership starts");
 	Config* conf=get_config();
 	_id=conf->id;
 	if(_id>=MAX_MEMBERS or _id<0){
@@ -33,7 +34,7 @@ void Membership::start(){
 	strcpy(_hostname,conf->peer_ip[_id].c_str());
 	strcpy(_m_server_port,conf->peer_membership_server_port[_id].c_str());
 	strcpy(_m_client_port,conf->peer_membership_client_port[_id].c_str());
-
+	// cout<<_hostname<<" "<<_m_server_port<<" "<<_m_client_port<<endl;
 
 	//start network module
 	_nw_server=new Network_UDP(_hostname,_m_server_port);

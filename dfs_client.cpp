@@ -18,15 +18,16 @@ void list_file(int id){
 	string ipaddr=conf->peer_ip[id];
 	string file_manager_port=conf->file_manager_port[id];
 	try{
-		auto res=Network_RPC::call_rpc(ipaddr,std::stoi(file_manager_port),"list_file");
-		cout<<"wcnm"<<endl;
-		cout<<typeid(res).name()<<endl;
+		auto res=Network_RPC::call_rpc(ipaddr,std::stoi(file_manager_port),"list_file").as<vector<string>>();
 		// cout<<res.type<<endl;
 		cout<<"files @ node "<<id<<endl;
-		cout<<res.as<string>()<<endl;
-		// for(auto &x:res){
-		// 	cout<<x<<endl;
-		// }
+		// cout<<res.as<string>()<<endl;
+		if(res.size()==0){
+			cout<<"no file to display"<<endl;
+		}
+		for(auto &x:res){
+			cout<<x<<endl;
+		}
 	}
 	catch(runtime_error& ex){
 
@@ -86,6 +87,7 @@ void get_file(int id,string filename){
 			return;
 		}
 		string content=Network_RPC::call_rpc(ipaddr,std::stoi(file_manager_port),"download_file",filename).as<string>();
+		
 		of.open("./"+filename);
 		of<<content;
 		of.close();
@@ -123,7 +125,7 @@ int main(int argc,char ** argv){
 			fprintf(stderr,"usage: ./client.out POST [path] [filename] \n");
 	    	exit(1);
 		}
-		upload_file(id,argv[3],argv[2]);
+		upload_file(id,argv[2],argv[3]);
 	}
 	else if(strcmp(argv[1],"LS")==0||strcmp(argv[1],"ls")==0){
 		list_file(id);
