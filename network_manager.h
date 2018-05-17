@@ -41,6 +41,13 @@ struct Peer_struct{
 	char peerip[IP_LENGTH];
 	char peerport[PORT_LENGTH];
 	bool suspicious=false;
+	Peer_struct(){}
+	Peer_struct(int id_,const char* peerip_,const char* peerport_){
+		id=id_;
+		strcpy(peerip,peerip_);
+		strcpy(peerport,peerport_);
+		suspicious=true;
+	}
 };
 enum msg_t {
 	UNKNOWN='a',
@@ -50,7 +57,9 @@ enum msg_t {
 	PING='e',
 	ACK='f',
 	INDIRECT_PING='g',
-	INDIRECT_ACK='h'
+	INDIRECT_ACK='h',
+	COORDINATOR='i',
+	ELECTION='j'
 };
 struct Work_item{
 	msg_t type;

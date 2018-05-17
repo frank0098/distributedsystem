@@ -11,6 +11,7 @@ using std::vector;
 class State_manager{
 public:
 	State_manager(){
+		std::lock_guard<std::mutex> lg(_m);
 		Config* conf=get_config();
 		_size=conf->peer_ip.size();
 		_self_id=conf->id;
@@ -19,6 +20,7 @@ public:
 			_peers.push_back(node);
 		}
 		_peers[_self_id].available=true;
+		_leader_id=-1;
 	}
 	vector<Node> get_peers(){
 		std::lock_guard<std::mutex> lg(_m);
@@ -43,6 +45,20 @@ public:
 	}
 	int get_size(){
 		return _size;
+	}
+	void set_leader(int id){
+		if(id>=_peers.size()) return;
+		std::lock_guard<std::mutex> lg(_m);
+		_leader_id=id;
+	}
+	void remove_leader(){
+		std::lock_guard<std::mutex> lg(_m);
+		_leader_id=-1;		
+	}
+	bool get_leader(int &id){
+		std::lock_guard<std::mutex> lg(_m);
+		id=_leader_id;
+		return _leader_id==-1;
 	}
 private:
 	int _leader_id;

@@ -77,6 +77,10 @@ void Config::load(){
 
 	}
 	int size=peer_ip.size();
+	if(size==0){
+		std::cout<<"no node specified!"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
 	if(size!=peer_membership_server_port.size()){
 		std::cout<<"error in config"<<std::endl;
 		exit(EXIT_FAILURE);

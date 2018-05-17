@@ -3,6 +3,7 @@
 #include "config.h"
 #include "membership.h"
 #include "file_manager.h"
+#include "election.h"
 
 #include <thread>
 #include <vector>

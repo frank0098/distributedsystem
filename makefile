@@ -19,6 +19,9 @@ dfs_client.o:
 server.o:
 	$(CC) $(CFLAGS)  -I./  server.cpp
 
+# election.o:
+	# $(CC) $(CFLAGS) -I./ election.cpp
+
 file_manager.o:
 	$(CC) $(CFLAGS) -I./  file_manager.cpp
 

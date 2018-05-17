@@ -90,7 +90,6 @@ bool Network_UDP::send_message(msg_t type,const char* dest,const char* dest_port
 		logger()->write(err);
         return false;
     }
-
     // loop through all the results and make a socket
     for(p = servinfo; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
@@ -98,15 +97,12 @@ bool Network_UDP::send_message(msg_t type,const char* dest,const char* dest_port
             perror("talker: socket");
             continue;
         }
-
         break;
     }
-
     if (p == NULL) {
 		logger()->write("talker: failed to bind socket\n");
         return false;
     }
-
     if ((numbytes = sendto(sockfd, buffer, BUFFER_SIZE, 0,
                            p->ai_addr, p->ai_addrlen)) == -1) {
     	logger()->write("talker: sendto\n");
@@ -166,7 +162,6 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
         {
           logger()->write("FATAL ERROR:SELECT\n");
           break;
-          // exit (EXIT_FAILURE);
         }
         if(selectStatus==0){
         	// printf("select timeout \n");
@@ -175,14 +170,12 @@ void Network_UDP::wait_message_from_peers(vector<Peer_struct>& input){
     	if(FD_ISSET(_sockfd,&read_fd_set)){
 			if (int numbytes = recvfrom(_sockfd, buffer, BUFFER_SIZE , 0,
 				(struct sockaddr *)&their_addr, &addr_len) == -1) {
-				// perror("recvfrom");
 				logger()->write("recvfromerr");
 				break;
 				// exit(EXIT_FAILURE);
 			}
 			msg_t msgtype=get_response(buffer,source,source_port,info,info_port);
 
-			// cout<<"RECVMESSAGE: "<<buffer<<endl;
 			if(msgtype==msg_t::ACK){
 				for(auto &p:input){
 					if(strcmp(source,p.peerip)==0 && strcmp(source_port,p.peerport)==0){
