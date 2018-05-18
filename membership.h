@@ -5,20 +5,22 @@
 #include "state_manager.h"
 #include "logger.h"
 #include "config.h"
-
+#include "election.h"
 
 #include <string>
 #include <vector>
 #include <mutex>
 #include <thread>
+#include <assert.h>
 
 #define MAX_MEMBERS 10
 using std::cout;
 using std::endl;
 //SWIM Infection-style Dissemination
+class Election_manager;
 class Membership{
 public:
-	Membership(State_manager* sm);
+	Membership(State_manager* sm,Election_manager* em);
 	void start();
 	void stop();
 	~Membership();
@@ -41,6 +43,7 @@ private:
 	std::thread _worker_send_message;
 	std::thread _worker_server;
 	std::thread _worker_client;
+	Election_manager* _em;
 	// bool peer_map[MAX_MEMBERS];
 	
 	int _id;

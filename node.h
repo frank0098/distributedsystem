@@ -39,6 +39,7 @@ public:
 		election_client_port=other.election_client_port;
 		file_server_port=other.file_server_port;
 		file_manager_port=other.file_manager_port;
+		available=other.available;
 	}
 };
 

@@ -1,8 +1,9 @@
 #include "membership.h"
 
 
-Membership::Membership(State_manager* sm):_sm(sm),_nw_client(nullptr),_nw_server(nullptr){
-
+Membership::Membership(State_manager* sm,Election_manager* em):_sm(sm),_em(em),_nw_client(nullptr),_nw_server(nullptr){
+	assert(sm);
+	assert(em);
 }
 Membership::~Membership(){
 
@@ -76,10 +77,11 @@ void Membership::start(){
 			add_member(p.peerip,p.peerport,p.id);
 		}
 	}
-	cout<<"start phase completed"<<endl;
+
 	_worker_client=std::thread([&](){
 		this->run_membership_client();
 	});
+	logger()->write("membership start completed");
 }
 void Membership::stop(){
 	vector<Peer_struct> v;
@@ -257,8 +259,14 @@ void Membership::remove_member(int id){
 		}
 	}
 	if(idx<0) return;
-
+	int leader_id;
+	bool has_leader=false;
+	has_leader=_sm->get_leader(leader_id);
 	_sm->set_dead(id);
+	if(has_leader){
+		_sm->remove_leader();
+		_em->start_election();
+	}
 
 	Peer_struct& p=_peers_v[idx];
 	string outputstr="membership: successfully remove ";
@@ -269,8 +277,8 @@ void Membership::remove_member(int id){
 	outputstr+=std::to_string(p.id);
 	// cout<<"removeagain"<<idx<<endl;
 	{
-	std::lock_guard<std::mutex> lg(_m);
-	_peers_v.erase(_peers_v.begin()+idx);
+		std::lock_guard<std::mutex> lg(_m);
+		_peers_v.erase(_peers_v.begin()+idx);
 	}
 
 	logger()->write(outputstr);

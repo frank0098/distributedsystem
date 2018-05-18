@@ -10,8 +10,8 @@ all: server dfs_client
 dfs_client: network_manager.o dfs_client.o logger.o config.o file_manager.o file_server.o simple_json.o
 	$(CC) network_manager.o dfs_client.o logger.o config.o file_manager.o file_server.o librpc.a simple_json.o -o client.out
 
-server: network_manager.o server.o logger.o membership.o config.o file_server.o file_manager.o simple_json.o
-	$(CC) -pthread network_manager.o server.o logger.o config.o membership.o file_server.o file_manager.o simple_json.o librpc.a -o server.out
+server: network_manager.o server.o logger.o membership.o config.o file_server.o file_manager.o simple_json.o election.o
+	$(CC) -pthread network_manager.o server.o logger.o config.o membership.o file_server.o file_manager.o simple_json.o election.o librpc.a -o server.out
 
 dfs_client.o:
 	$(CC) $(CFLAGS)  -I./  dfs_client.cpp
@@ -19,8 +19,8 @@ dfs_client.o:
 server.o:
 	$(CC) $(CFLAGS)  -I./  server.cpp
 
-# election.o:
-	# $(CC) $(CFLAGS) -I./ election.cpp
+election.o:
+	$(CC) $(CFLAGS) -I./ election.cpp
 
 file_manager.o:
 	$(CC) $(CFLAGS) -I./  file_manager.cpp

@@ -1,7 +1,6 @@
 #include "network_manager.h"
 #include "logger.h"
 #include "config.h"
-#include "membership.h"
 #include "file_manager.h"
 #include "election.h"
 
@@ -35,6 +34,7 @@ int main(int argc,char** argv){
 	State_manager sm;
 	conf->id=id;
 
+	bool running=true;
 	//signal for control c
 	// struct sigaction sigIntHandler;
 
@@ -44,17 +44,15 @@ int main(int argc,char** argv){
 
  //   sigaction(SIGINT, &sigIntHandler, NULL);
 
-	Membership m(&sm);
-	bool running=true;
+	Election_manager em(&sm);
+
 	File_manager fm(&sm);
-
-
-
-	m.start();
 	fm.start();
+
+	
 	// File_server fs;
-	while(running){
-		
+	while(running){	
+			
 	}
 
 
